@@ -286,12 +286,73 @@ For each new feature, ensure:
 - [ ] Use Cases for business logic
 - [ ] StateFlow/Flow for reactive programming
 - [ ] Sealed classes for State representation
-- [ ] Proper when-expression handling for all state cases
-- [ ] Compose UI with `koinViewModel()` for ViewModels
+- [ ] **Exhaustive when-expressions (cover all sealed class cases)**
+- [ ] **Constructor injection for ViewModels with parameters**
+- [ ] **Auto-initialization in ViewModel init blocks**
+- [ ] Compose UI with `koinViewModel { parametersOf(...) }` for ViewModels
 - [ ] Error handling with Result<T> and sealed error classes
 - [ ] Navigation via callback functions
 - [ ] Unit tests for ViewModels and Use Cases with Koin test module
 - [ ] UI tests for Compose screens
+
+## 🎯 **MANDATORY PATTERNS**
+
+### **1. Exhaustive When Expressions**
+```kotlin
+// ✅ REQUIRED: All when expressions must be exhaustive
+fun handleIntent(intent: MyIntent) {
+    when (intent) {
+        is MyIntent.Action1 -> handleAction1()
+        is MyIntent.Action2 -> handleAction2()
+        // Must cover ALL sealed class cases - compiler enforces
+    }
+}
+```
+
+### **2. ViewModel Constructor Injection**
+```kotlin
+// ✅ REQUIRED: Parameters injected via constructor
+class MyViewModel(
+    private val parameter: String,  // Injected parameter
+    private val useCase: MyUseCase  // Injected dependency
+) : ViewModel() {
+    
+    init {
+        // Auto-initialize with parameter
+        loadData(parameter)
+    }
+}
+
+// ✅ REQUIRED: Koin module with parameters (new DSL)
+viewModel { parameters ->
+    MyViewModel(
+        parameter = parameters.get(),
+        useCase = get()
+    )
+}
+
+// ✅ REQUIRED: View usage with parameters
+@Composable
+fun MyScreen(
+    id: String,
+    viewModel: MyViewModel = koinViewModel { parametersOf(id) }
+) {
+    // No LaunchedEffect needed - ViewModel auto-initializes!
+}
+```
+
+### **3. ViewModels MUST Auto-Initialize**
+```kotlin
+// ❌ WRONG: View telling ViewModel what to do
+LaunchedEffect(id) {
+    viewModel.handleIntent(MyIntent.Load(id))
+}
+
+// ✅ CORRECT: ViewModel handles its own lifecycle
+init {
+    loadData(parameterId) // Auto-loads in constructor
+}
+```
 
 ---
 
@@ -301,8 +362,8 @@ For each new feature, ensure:
 
 | Component | Status | Progress | Notes |
 |-----------|--------|----------|--------|
-| **MVI Architecture** | ✅ Complete | 100% | Sealed classes, StateFlow, Intents |
-| **Koin DI Setup** | ✅ Complete | 100% | All modules configured |
+| **MVI Architecture** | ✅ Complete | 100% | Sealed classes, exhaustive when, constructor injection |
+| **Koin DI Setup** | ✅ Complete | 100% | All modules configured, Compose context fixed |
 | **Clean Architecture** | ✅ Complete | 100% | Data/Domain/Presentation layers |
 | **Navigation** | ✅ Complete | 100% | Navigation Compose setup |
 | **Theme System** | ✅ Complete | 100% | Material 3 + vintage colors |
@@ -313,7 +374,7 @@ For each new feature, ensure:
 | Screen | Status | Progress | Implementation Details |
 |--------|--------|----------|------------------------|
 | **HomeScreen** | ✅ Complete | 100% | MVI, navigation, state management |
-| **EditorScreen** | ✅ Complete | 90% | UI complete, image processing stubs |
+| **EditorScreen** | ✅ Complete | 95% | Full UI working, auto-load fixed, needs image picker |
 | **PreviewScreen** | ✅ Complete | 80% | UI complete, export logic stubs |
 | **MyCardsScreen** | ✅ Complete | 100% | Card management, tabs, actions |
 | **SettingsScreen** | ✅ Complete | 90% | Billing UI, missing billing logic |

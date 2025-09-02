@@ -12,6 +12,7 @@ import solutions.appme.nosticard.ui.components.SnackbarMessages
 import java.util.*
 
 class EditorViewModel(
+    private val postcardId: String?,
     private val applyFilterUseCase: ApplyFilterUseCase,
     private val savePostcardUseCase: SavePostcardUseCase
 ) : ViewModel() {
@@ -21,10 +22,14 @@ class EditorViewModel(
 
     private val _effect = MutableSharedFlow<EditorEffect>()
     val effect: SharedFlow<EditorEffect> = _effect.asSharedFlow()
+    
+    init {
+        handleIntent(EditorIntent.LoadPostcard(postcardId = postcardId))
+    }
 
     fun handleIntent(intent: EditorIntent) {
         when (intent) {
-            is EditorIntent.LoadPostcard -> loadPostcard(intent.postcardId)
+            is EditorIntent.LoadPostcard -> loadPostcard(postcardId)
             is EditorIntent.LoadImage -> loadImage(intent.imagePath)
             is EditorIntent.ApplyFilter -> applyFilter(intent.filterType)
             is EditorIntent.ApplyFrame -> applyFrame(intent.frameType)

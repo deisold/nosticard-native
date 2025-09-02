@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 import solutions.appme.nosticard.features.editor.view.components.*
 import solutions.appme.nosticard.features.editor.viewmodel.*
 import solutions.appme.nosticard.ui.components.showSnackbar
@@ -18,9 +19,10 @@ import solutions.appme.nosticard.ui.components.showSnackbar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
+    postcardId: String? = null,
     onNavigateBack: () -> Unit,
     onNavigateToPreview: (String) -> Unit,
-    viewModel: EditorViewModel = koinViewModel()
+    viewModel: EditorViewModel = koinViewModel { parametersOf(postcardId) }
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 import solutions.appme.nosticard.features.preview.viewmodel.*
 import solutions.appme.nosticard.ui.components.showSnackbar
 
@@ -20,14 +21,10 @@ fun PreviewScreen(
     postcardId: String,
     onNavigateBack: () -> Unit,
     onNavigateToMyCards: () -> Unit,
-    viewModel: PreviewViewModel = koinViewModel()
+    viewModel: PreviewViewModel = koinViewModel { parametersOf(postcardId) }
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    
-    LaunchedEffect(postcardId) {
-        viewModel.handleIntent(PreviewIntent.LoadPostcard(postcardId))
-    }
     
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->

@@ -9,6 +9,7 @@ import solutions.appme.nosticard.features.preview.domain.SharePostcardUseCase
 import solutions.appme.nosticard.ui.components.SnackbarMessages
 
 class PreviewViewModel(
+    private val postcardId: String,
     private val exportPostcardUseCase: ExportPostcardUseCase,
     private val sharePostcardUseCase: SharePostcardUseCase
 ) : ViewModel() {
@@ -19,9 +20,12 @@ class PreviewViewModel(
     private val _effect = MutableSharedFlow<PreviewEffect>()
     val effect: SharedFlow<PreviewEffect> = _effect.asSharedFlow()
 
+    init {
+        loadPostcard(postcardId)
+    }
+
     fun handleIntent(intent: PreviewIntent) {
         when (intent) {
-            is PreviewIntent.LoadPostcard -> loadPostcard(intent.postcardId)
             is PreviewIntent.ExportAsJpeg -> exportAsJpeg()
             is PreviewIntent.ExportAsPdf -> exportAsPdf()
             is PreviewIntent.ShareImage -> shareImage(intent.message)

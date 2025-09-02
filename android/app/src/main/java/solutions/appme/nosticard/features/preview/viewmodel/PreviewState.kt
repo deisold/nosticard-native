@@ -24,7 +24,6 @@ sealed class PreviewState {
 }
 
 sealed class PreviewIntent {
-    data class LoadPostcard(val postcardId: String) : PreviewIntent()
     object ExportAsJpeg : PreviewIntent()
     object ExportAsPdf : PreviewIntent()
     data class ShareImage(val message: String = "Check out my postcard!") : PreviewIntent()

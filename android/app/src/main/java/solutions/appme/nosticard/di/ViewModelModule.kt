@@ -1,6 +1,6 @@
 package solutions.appme.nosticard.di
 
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import solutions.appme.nosticard.features.home.viewmodel.HomeViewModel
 import solutions.appme.nosticard.features.editor.viewmodel.EditorViewModel
@@ -10,7 +10,7 @@ import solutions.appme.nosticard.features.settings.viewmodel.SettingsViewModel
 
 val viewModelModule = module {
     
-    viewModel<HomeViewModel> {
+    viewModel {
         HomeViewModel(
             getPostcardsUseCase = get(),
             deletePostcardUseCase = get(),
@@ -18,28 +18,30 @@ val viewModelModule = module {
         )
     }
     
-    viewModel<EditorViewModel> {
+    viewModel { parameters ->
         EditorViewModel(
+            postcardId = parameters.getOrNull(),
             applyFilterUseCase = get(),
             savePostcardUseCase = get()
         )
     }
     
-    viewModel<PreviewViewModel> {
+    viewModel { parameters ->
         PreviewViewModel(
+            postcardId = parameters.get(),
             exportPostcardUseCase = get(),
             sharePostcardUseCase = get()
         )
     }
     
-    viewModel<MyCardsViewModel> {
+    viewModel {
         MyCardsViewModel(
             getPostcardsUseCase = get(),
             deletePostcardUseCase = get()
         )
     }
     
-    viewModel<SettingsViewModel> {
+    viewModel {
         SettingsViewModel(
             billingRepository = get()
         )

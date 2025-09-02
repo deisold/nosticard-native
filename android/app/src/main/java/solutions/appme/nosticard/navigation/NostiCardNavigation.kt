@@ -33,8 +33,13 @@ fun NostiCardNavigation(navController: NavHostController) {
             )
         }
         
-        composable(Screen.Editor.route) {
+        composable(
+            route = Screen.Editor.route,
+            arguments = Screen.Editor.arguments
+        ) { backStackEntry ->
+            val postcardId = backStackEntry.arguments?.getString("postcardId")
             EditorScreen(
+                postcardId = postcardId,
                 onNavigateBack = {
                     navController.popBackStack()
                 },
