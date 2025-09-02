@@ -835,3 +835,333 @@ This architecture ensures:
 5. **Set up testing framework** - Quality assurance
 
 The foundation is solid - now focus on completing the missing screens and image processing pipeline!
+
+---
+
+## 🚀 **Next Steps Implementation Roadmap**
+
+### **Phase 1: Image Processing & Core Features** (Priority: Critical)
+
+#### **1.1 Skia/Canvas Filter Effects** ⚠️
+**Status**: Stub implementation only  
+**Priority**: CRITICAL - Core app functionality  
+**Estimated Time**: 2-3 weeks  
+
+**Tasks:**
+- [ ] Set up Skia integration for Android
+- [ ] Implement Classic B&W filter using ColorMatrix
+- [ ] Implement Sepia Memories filter with proper color transformation  
+- [ ] Implement Faded Color filter with alpha adjustments
+- [ ] Add vintage effects pipeline:
+  - [ ] Randomized scratches generation
+  - [ ] Dust overlay system
+  - [ ] Grain texture application
+  - [ ] Vignette effect implementation
+- [ ] Optimize for performance (tiling for large images)
+- [ ] Add real-time preview updates (<0.5s target)
+- [ ] Memory management for 3-4GB devices
+
+**Files to update:**
+- `ImageRepositoryImpl.kt` - Complete filter implementations
+- `EditorViewModel.kt` - Add real-time preview logic
+- Add new `SkiaFilterProcessor.kt` utility class
+
+#### **1.2 Frame Rendering Implementation** ⚠️  
+**Status**: Stub implementation only  
+**Priority**: HIGH - Visual appeal  
+**Estimated Time**: 1 week  
+
+**Tasks:**
+- [ ] Implement White Border frame (simple padding)
+- [ ] Implement Deckle Edge frame (irregular border effect)
+- [ ] Implement Stamp Edge frame (perforated border effect)
+- [ ] Add frame preview in editor
+- [ ] Optimize frame rendering performance
+
+**Files to update:**
+- `ImageRepositoryImpl.kt` - Complete frame methods
+- Add new `FrameRenderer.kt` utility class
+
+#### **1.3 Text Positioning & Styling** ⚠️
+**Status**: Basic text input only  
+**Priority**: HIGH - User experience  
+**Estimated Time**: 1 week  
+
+**Tasks:**
+- [ ] Implement draggable text positioning in Compose
+- [ ] Add text alignment controls (left/center/right)
+- [ ] Add text shadow/backdrop options
+- [ ] Integrate Downloadable Fonts API for handwriting styles
+- [ ] Add text size adjustment
+- [ ] Add text color picker
+- [ ] Text bounds checking (keep within postcard)
+
+**Files to update:**
+- `EditorScreen.kt` - Add draggable text component
+- `EditorControls.kt` - Add text styling controls
+- Add new `DraggableTextComponent.kt`
+
+---
+
+### **Phase 2: Camera & Media Integration** (Priority: High)
+
+#### **2.1 CameraX Integration** ❌
+**Status**: Not implemented  
+**Priority**: HIGH - Core feature  
+**Estimated Time**: 1-2 weeks  
+
+**Tasks:**
+- [ ] Add CameraX dependencies to build.gradle.kts
+- [ ] Create CameraScreen with CameraX integration
+- [ ] Implement photo capture functionality
+- [ ] Add camera preview with overlay guides
+- [ ] Handle different camera orientations
+- [ ] Add flash control
+- [ ] Add front/back camera switching
+- [ ] Integrate with existing editor flow
+
+**Files to create:**
+- `features/camera/view/CameraScreen.kt`
+- `features/camera/viewmodel/CameraViewModel.kt`
+- `features/camera/domain/CapturePhotoUseCase.kt`
+
+**Files to update:**
+- `navigation/Screen.kt` - Add camera route
+- `navigation/NostiCardNavigation.kt` - Add camera composable
+
+#### **2.2 Photo Picker Enhancement** ⚠️
+**Status**: Basic implementation  
+**Priority**: MEDIUM - Better UX  
+**Estimated Time**: 3 days  
+
+**Tasks:**
+- [ ] Implement Android Photo Picker API (Android 13+)
+- [ ] Add fallback for older Android versions
+- [ ] Add multi-select capability (for batch processing)
+- [ ] Add image crop functionality
+- [ ] Add image rotation controls
+
+---
+
+### **Phase 3: Monetization & Billing** (Priority: Business Critical)
+
+#### **3.1 Google Play Billing Implementation** ⚠️
+**Status**: Mock implementation only  
+**Priority**: CRITICAL - Revenue  
+**Estimated Time**: 1-2 weeks  
+
+**Tasks:**
+- [ ] Set up Google Play Billing v6 properly
+- [ ] Implement actual purchase flow
+- [ ] Add purchase verification
+- [ ] Handle purchase states (pending, purchased, cancelled)
+- [ ] Implement subscription management (if applicable)
+- [ ] Add purchase analytics tracking
+- [ ] Test with Google Play Console
+- [ ] Handle edge cases (network issues, refunds)
+
+**Files to update:**
+- `BillingRepositoryImpl.kt` - Replace stub with real implementation
+- `SettingsViewModel.kt` - Add proper billing state management
+- Add new `BillingVerificationService.kt`
+
+#### **3.2 Export Quality & Watermarking** ⚠️
+**Status**: Stub implementation only  
+**Priority**: HIGH - Monetization enforcement  
+**Estimated Time**: 1 week  
+
+**Tasks:**
+- [ ] Implement HD export (1800px for premium, 1080px for free)
+- [ ] Add watermark rendering for free users
+- [ ] Implement PDF export using PdfDocument API
+- [ ] Add export progress indication
+- [ ] Handle export errors gracefully
+- [ ] Add export quality settings
+
+**Files to update:**
+- `ImageRepositoryImpl.kt` - Complete export methods
+- `PreviewViewModel.kt` - Add proper export flow
+
+---
+
+### **Phase 4: File Management & Sharing** (Priority: Medium)
+
+#### **4.1 File Providers Setup** ❌
+**Status**: Not implemented  
+**Priority**: MEDIUM - Sharing functionality  
+**Estimated Time**: 2-3 days  
+
+**Tasks:**
+- [ ] Configure FileProvider in AndroidManifest.xml
+- [ ] Create file_paths.xml resource
+- [ ] Update sharing implementation with proper URIs
+- [ ] Test sharing across different apps (WhatsApp, Gmail, SMS)
+- [ ] Handle sharing permissions properly
+
+**Files to create:**
+- `app/src/main/res/xml/file_paths.xml`
+
+**Files to update:**
+- `AndroidManifest.xml` - Add FileProvider configuration
+- `ShareRepositoryImpl.kt` - Use FileProvider URIs
+
+#### **4.2 Export & Storage Management** ⚠️
+**Status**: Basic implementation  
+**Priority**: MEDIUM - User experience  
+**Estimated Time**: 1 week  
+
+**Tasks:**
+- [ ] Add export to gallery functionality
+- [ ] Implement export history tracking
+- [ ] Add file cleanup for old exports
+- [ ] Handle storage permissions properly
+- [ ] Add export location selection
+
+---
+
+### **Phase 5: Permissions & Security** (Priority: High)
+
+#### **5.1 Runtime Permissions** ❌
+**Status**: Not implemented  
+**Priority**: HIGH - App functionality  
+**Estimated Time**: 3-4 days  
+
+**Tasks:**
+- [ ] Add camera permission handling
+- [ ] Add storage permission handling (Android versions)
+- [ ] Add notification permissions (Android 13+)
+- [ ] Implement permission request flows
+- [ ] Handle permission denial gracefully
+- [ ] Add permission rationale explanations
+
+**Files to create:**
+- `utils/PermissionManager.kt`
+- `components/PermissionDialog.kt`
+
+**Files to update:**
+- `AndroidManifest.xml` - Add required permissions
+- All ViewModels - Add permission checks
+
+#### **5.2 Security & Privacy** ❌
+**Status**: Not implemented  
+**Priority**: MEDIUM - Compliance  
+**Estimated Time**: 2-3 days  
+
+**Tasks:**
+- [ ] Implement data encryption for sensitive data
+- [ ] Add privacy-compliant analytics (optional)
+- [ ] Secure IAP verification
+- [ ] Add crash reporting (optional)
+- [ ] GDPR compliance measures
+
+---
+
+### **Phase 6: Testing & Quality Assurance** (Priority: Critical)
+
+#### **6.1 Unit Testing** ❌
+**Status**: Test framework setup only  
+**Priority**: CRITICAL - Code quality  
+**Estimated Time**: 1-2 weeks  
+
+**Tasks:**
+- [ ] Write ViewModel unit tests
+- [ ] Write Repository unit tests  
+- [ ] Write UseCase unit tests
+- [ ] Add database testing with Room testing utilities
+- [ ] Mock external dependencies properly
+- [ ] Achieve >80% code coverage
+
+**Files to create:**
+- `test/viewmodel/HomeViewModelTest.kt`
+- `test/viewmodel/EditorViewModelTest.kt`
+- `test/repository/StorageRepositoryTest.kt`
+- `test/repository/ImageRepositoryTest.kt`
+- `test/repository/BillingRepositoryTest.kt`
+
+#### **6.2 UI Testing** ❌
+**Status**: Not implemented  
+**Priority**: HIGH - User experience  
+**Estimated Time**: 1 week  
+
+**Tasks:**
+- [ ] Write Compose UI tests for all screens
+- [ ] Add navigation testing
+- [ ] Test user interaction flows
+- [ ] Add accessibility testing
+- [ ] Performance testing on different devices
+
+**Files to create:**
+- `androidTest/HomeScreenTest.kt`
+- `androidTest/EditorScreenTest.kt`
+- `androidTest/NavigationTest.kt`
+
+---
+
+### **Phase 7: Performance & Polish** (Priority: Medium)
+
+#### **7.1 Performance Optimization** ⚠️
+**Status**: Basic implementation  
+**Priority**: MEDIUM - User experience  
+**Estimated Time**: 1 week  
+
+**Tasks:**
+- [ ] Image loading optimization
+- [ ] Memory usage optimization
+- [ ] Battery usage optimization
+- [ ] App startup time optimization
+- [ ] Compose performance tuning
+- [ ] Database query optimization
+
+#### **7.2 Accessibility & Localization** ❌
+**Status**: Not implemented  
+**Priority**: LOW - Market reach  
+**Estimated Time**: 1 week  
+
+**Tasks:**
+- [ ] Add content descriptions for all UI elements
+- [ ] Test with TalkBack
+- [ ] Add haptic feedback
+- [ ] Add string resources for localization
+- [ ] Support for RTL languages
+
+---
+
+## 📊 **Implementation Progress Tracking**
+
+### **Current Status: MVP Scaffold Complete (60%)**
+- ✅ **Architecture & Foundation**: 100% Complete
+- ✅ **MVI Implementation**: 100% Complete  
+- ✅ **Koin DI Setup**: 100% Complete
+- ✅ **Compose UI Screens**: 100% Complete (stubs)
+- ✅ **Navigation**: 100% Complete
+- ⚠️ **Core Features**: 30% Complete (stubs only)
+- ❌ **Image Processing**: 0% Complete
+- ❌ **Camera Integration**: 0% Complete
+- ❌ **Billing**: 5% Complete (mocks only)
+- ❌ **Testing**: 0% Complete
+
+### **Immediate Next Actions (This Week)**
+1. **Complete Skia filter implementation** - Unblock core functionality
+2. **Set up CameraX integration** - Essential user feature
+3. **Implement proper Google Play Billing** - Revenue critical
+4. **Add runtime permissions** - App store requirement
+
+### **Success Criteria for MVP Launch**
+- [ ] All image filters working properly
+- [ ] Camera capture integrated
+- [ ] Export & sharing functional  
+- [ ] IAP working with real products
+- [ ] Basic testing coverage (>70%)
+- [ ] Performance targets met (<0.5s filter preview, <3s export)
+
+### **Development Environment Setup**
+```bash
+# Required tools
+- Android Studio Ladybug or later
+- JDK 17+
+- Android SDK API 35
+- Google Play Billing Library v6
+- CameraX libraries
+```
+
+This roadmap provides a clear path from the current scaffold to a production-ready NostiCard Android app! 🎯
