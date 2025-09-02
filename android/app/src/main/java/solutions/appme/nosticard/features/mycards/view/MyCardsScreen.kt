@@ -14,6 +14,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import solutions.appme.nosticard.features.home.view.components.PostcardItem
 import solutions.appme.nosticard.features.mycards.viewmodel.*
+import solutions.appme.nosticard.ui.components.showSnackbar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,17 +25,15 @@ fun MyCardsScreen(
     viewModel: MyCardsViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
     
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is MyCardsEffect.NavigateToEditor -> onNavigateToEditor(effect.cardId)
                 is MyCardsEffect.NavigateToPreview -> onNavigateToPreview(effect.cardId)
-                is MyCardsEffect.ShowError -> {
-                    // TODO: Show error snackbar
-                }
-                is MyCardsEffect.ShowSuccess -> {
-                    // TODO: Show success snackbar
+                is MyCardsEffect.ShowSnackbar -> {
+                    showSnackbar(snackbarHostState, effect.message)
                 }
                 is MyCardsEffect.ShowDeleteConfirmation -> {
                     // TODO: Show delete confirmation dialog
@@ -53,7 +52,8 @@ fun MyCardsScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         MyCardsContent(
             state = state,

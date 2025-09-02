@@ -2,6 +2,7 @@ package solutions.appme.nosticard.features.preview.viewmodel
 
 import android.graphics.Bitmap
 import solutions.appme.nosticard.data.model.Postcard
+import solutions.appme.nosticard.ui.components.SnackbarMessage
 
 sealed class PreviewState {
     object Loading : PreviewState()
@@ -33,8 +34,7 @@ sealed class PreviewIntent {
 }
 
 sealed class PreviewEffect {
-    data class ShowError(val message: String) : PreviewEffect()
-    data class ShowSuccess(val message: String) : PreviewEffect()
+    data class ShowSnackbar(val message: SnackbarMessage) : PreviewEffect()
     object NavigateBack : PreviewEffect()
     object NavigateToMyCards : PreviewEffect()
     data class ShowUpgradeDialog(val feature: String) : PreviewEffect()

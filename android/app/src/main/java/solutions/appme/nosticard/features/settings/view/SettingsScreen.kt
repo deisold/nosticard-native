@@ -16,6 +16,7 @@ import org.koin.androidx.compose.koinViewModel
 import solutions.appme.nosticard.data.repository.BillingProduct
 import solutions.appme.nosticard.data.repository.ProductType
 import solutions.appme.nosticard.features.settings.viewmodel.*
+import solutions.appme.nosticard.ui.components.showSnackbar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,15 +25,13 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
     
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is SettingsEffect.ShowError -> {
-                    // TODO: Show error snackbar
-                }
-                is SettingsEffect.ShowSuccess -> {
-                    // TODO: Show success snackbar
+                is SettingsEffect.ShowSnackbar -> {
+                    showSnackbar(snackbarHostState, effect.message)
                 }
                 is SettingsEffect.ShowPurchaseDialog -> {
                     // TODO: Show purchase dialog
@@ -57,7 +56,8 @@ fun SettingsScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         SettingsContent(
             state = state,

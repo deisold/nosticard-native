@@ -1,6 +1,7 @@
 package solutions.appme.nosticard.features.home.viewmodel
 
 import solutions.appme.nosticard.data.model.Postcard
+import solutions.appme.nosticard.ui.components.SnackbarMessage
 
 sealed class HomeState {
     object Loading : HomeState()
@@ -31,8 +32,7 @@ sealed class HomeIntent {
 }
 
 sealed class HomeEffect {
-    data class ShowError(val message: String) : HomeEffect()
-    data class ShowSuccess(val message: String) : HomeEffect()
+    data class ShowSnackbar(val message: SnackbarMessage) : HomeEffect()
     object NavigateToEditor : HomeEffect()
     data class NavigateToPostcard(val postcardId: String) : HomeEffect()
 }

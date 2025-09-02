@@ -13,6 +13,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import solutions.appme.nosticard.features.editor.view.components.*
 import solutions.appme.nosticard.features.editor.viewmodel.*
+import solutions.appme.nosticard.ui.components.showSnackbar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,17 +23,15 @@ fun EditorScreen(
     viewModel: EditorViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
     
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is EditorEffect.NavigateBack -> onNavigateBack()
                 is EditorEffect.NavigateToPreview -> onNavigateToPreview("")
-                is EditorEffect.ShowError -> {
-                    // TODO: Show error snackbar
-                }
-                is EditorEffect.ShowSuccess -> {
-                    // TODO: Show success snackbar
+                is EditorEffect.ShowSnackbar -> {
+                    showSnackbar(snackbarHostState, effect.message)
                 }
                 is EditorEffect.RequestPermission -> {
                     // TODO: Request permission
@@ -58,7 +57,8 @@ fun EditorScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         EditorContent(
             state = state,

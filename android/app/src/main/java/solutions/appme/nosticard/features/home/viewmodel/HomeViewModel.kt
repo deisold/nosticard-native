@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import solutions.appme.nosticard.features.home.domain.DeletePostcardUseCase
 import solutions.appme.nosticard.features.home.domain.DuplicatePostcardUseCase
 import solutions.appme.nosticard.features.home.domain.GetPostcardsUseCase
+import solutions.appme.nosticard.ui.components.SnackbarMessages
 
 class HomeViewModel(
     private val getPostcardsUseCase: GetPostcardsUseCase,
@@ -78,10 +79,10 @@ class HomeViewModel(
         viewModelScope.launch {
             deletePostcardUseCase(postcardId)
                 .onSuccess {
-                    _effect.emit(HomeEffect.ShowSuccess("Postcard deleted successfully"))
+                    _effect.emit(HomeEffect.ShowSnackbar(SnackbarMessages.success("Postcard deleted successfully")))
                 }
                 .onFailure { error ->
-                    _effect.emit(HomeEffect.ShowError(error.message ?: "Failed to delete postcard"))
+                    _effect.emit(HomeEffect.ShowSnackbar(SnackbarMessages.error(error.message ?: "Failed to delete postcard")))
                 }
         }
     }
@@ -90,11 +91,11 @@ class HomeViewModel(
         viewModelScope.launch {
             duplicatePostcardUseCase(postcard)
                 .onSuccess { duplicatedPostcard ->
-                    _effect.emit(HomeEffect.ShowSuccess("Postcard duplicated successfully"))
+                    _effect.emit(HomeEffect.ShowSnackbar(SnackbarMessages.success("Postcard duplicated successfully")))
                     _effect.emit(HomeEffect.NavigateToPostcard(duplicatedPostcard.id))
                 }
                 .onFailure { error ->
-                    _effect.emit(HomeEffect.ShowError(error.message ?: "Failed to duplicate postcard"))
+                    _effect.emit(HomeEffect.ShowSnackbar(SnackbarMessages.error(error.message ?: "Failed to duplicate postcard")))
                 }
         }
     }

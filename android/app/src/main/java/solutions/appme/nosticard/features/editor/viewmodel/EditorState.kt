@@ -2,6 +2,7 @@ package solutions.appme.nosticard.features.editor.viewmodel
 
 import android.graphics.Bitmap
 import solutions.appme.nosticard.data.model.*
+import solutions.appme.nosticard.ui.components.SnackbarMessage
 
 sealed class EditorState {
     object Loading : EditorState()
@@ -42,8 +43,7 @@ sealed class EditorIntent {
 }
 
 sealed class EditorEffect {
-    data class ShowError(val message: String) : EditorEffect()
-    data class ShowSuccess(val message: String) : EditorEffect()
+    data class ShowSnackbar(val message: SnackbarMessage) : EditorEffect()
     object NavigateToPreview : EditorEffect()
     object NavigateBack : EditorEffect()
     data class RequestPermission(val permission: String) : EditorEffect()

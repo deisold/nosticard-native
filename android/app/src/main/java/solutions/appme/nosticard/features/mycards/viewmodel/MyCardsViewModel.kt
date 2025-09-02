@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import solutions.appme.nosticard.features.home.domain.DeletePostcardUseCase
 import solutions.appme.nosticard.features.home.domain.GetPostcardsUseCase
+import solutions.appme.nosticard.ui.components.SnackbarMessages
 
 class MyCardsViewModel(
     private val getPostcardsUseCase: GetPostcardsUseCase,
@@ -83,11 +84,11 @@ class MyCardsViewModel(
         viewModelScope.launch {
             deletePostcardUseCase(cardId)
                 .onSuccess {
-                    _effect.emit(MyCardsEffect.ShowSuccess("Card deleted successfully"))
+                    _effect.emit(MyCardsEffect.ShowSnackbar(SnackbarMessages.success("Card deleted successfully")))
                 }
                 .onFailure { error ->
-                    _effect.emit(MyCardsEffect.ShowError(
-                        error.message ?: "Failed to delete card"
+                    _effect.emit(MyCardsEffect.ShowSnackbar(
+                        SnackbarMessages.error(error.message ?: "Failed to delete card")
                     ))
                 }
         }
@@ -96,7 +97,7 @@ class MyCardsViewModel(
     private fun duplicateCard(card: solutions.appme.nosticard.data.model.Postcard) {
         viewModelScope.launch {
             // TODO: Implement duplicate functionality
-            _effect.emit(MyCardsEffect.ShowSuccess("Card duplicated successfully"))
+            _effect.emit(MyCardsEffect.ShowSnackbar(SnackbarMessages.success("Card duplicated successfully")))
         }
     }
 

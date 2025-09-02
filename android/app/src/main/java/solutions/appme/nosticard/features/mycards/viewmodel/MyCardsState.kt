@@ -1,6 +1,7 @@
 package solutions.appme.nosticard.features.mycards.viewmodel
 
 import solutions.appme.nosticard.data.model.Postcard
+import solutions.appme.nosticard.ui.components.SnackbarMessage
 
 sealed class MyCardsState {
     object Loading : MyCardsState()
@@ -36,8 +37,7 @@ sealed class MyCardsIntent {
 }
 
 sealed class MyCardsEffect {
-    data class ShowError(val message: String) : MyCardsEffect()
-    data class ShowSuccess(val message: String) : MyCardsEffect()
+    data class ShowSnackbar(val message: SnackbarMessage) : MyCardsEffect()
     data class NavigateToEditor(val cardId: String) : MyCardsEffect()
     data class NavigateToPreview(val cardId: String) : MyCardsEffect()
     data class ShowDeleteConfirmation(val cardId: String, val cardTitle: String) : MyCardsEffect()

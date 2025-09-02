@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import solutions.appme.nosticard.features.preview.viewmodel.*
+import solutions.appme.nosticard.ui.components.showSnackbar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,6 +23,7 @@ fun PreviewScreen(
     viewModel: PreviewViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
     
     LaunchedEffect(postcardId) {
         viewModel.handleIntent(PreviewIntent.LoadPostcard(postcardId))
@@ -32,11 +34,8 @@ fun PreviewScreen(
             when (effect) {
                 is PreviewEffect.NavigateBack -> onNavigateBack()
                 is PreviewEffect.NavigateToMyCards -> onNavigateToMyCards()
-                is PreviewEffect.ShowError -> {
-                    // TODO: Show error snackbar
-                }
-                is PreviewEffect.ShowSuccess -> {
-                    // TODO: Show success snackbar
+                is PreviewEffect.ShowSnackbar -> {
+                    showSnackbar(snackbarHostState, effect.message)
                 }
                 is PreviewEffect.ShowUpgradeDialog -> {
                     // TODO: Show upgrade dialog
@@ -62,7 +61,8 @@ fun PreviewScreen(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         PreviewContent(
             state = state,

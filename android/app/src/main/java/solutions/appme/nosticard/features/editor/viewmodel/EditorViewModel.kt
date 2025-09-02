@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import solutions.appme.nosticard.data.model.*
 import solutions.appme.nosticard.features.editor.domain.ApplyFilterUseCase
 import solutions.appme.nosticard.features.editor.domain.SavePostcardUseCase
+import solutions.appme.nosticard.ui.components.SnackbarMessages
 import java.util.*
 
 class EditorViewModel(
@@ -118,8 +119,8 @@ class EditorViewModel(
                     )
                 }.onFailure { error ->
                     _state.value = currentState.copy(isProcessing = false)
-                    _effect.emit(EditorEffect.ShowError(
-                        error.message ?: "Failed to apply filter"
+                    _effect.emit(EditorEffect.ShowSnackbar(
+                        SnackbarMessages.error(error.message ?: "Failed to apply filter")
                     ))
                 }
             }
@@ -197,7 +198,7 @@ class EditorViewModel(
             viewModelScope.launch {
                 // TODO: Generate final preview with all effects
                 _state.value = currentState.copy(isProcessing = false)
-                _effect.emit(EditorEffect.ShowSuccess("Preview generated"))
+                _effect.emit(EditorEffect.ShowSnackbar(SnackbarMessages.success("Preview generated")))
             }
         }
     }
@@ -216,12 +217,12 @@ class EditorViewModel(
                 savePostcardUseCase(draftPostcard)
                     .onSuccess {
                         _state.value = currentState.copy(isSaving = false)
-                        _effect.emit(EditorEffect.ShowSuccess("Draft saved"))
+                        _effect.emit(EditorEffect.ShowSnackbar(SnackbarMessages.success("Draft saved")))
                     }
                     .onFailure { error ->
                         _state.value = currentState.copy(isSaving = false)
-                        _effect.emit(EditorEffect.ShowError(
-                            error.message ?: "Failed to save draft"
+                        _effect.emit(EditorEffect.ShowSnackbar(
+                            SnackbarMessages.error(error.message ?: "Failed to save draft")
                         ))
                     }
             }
@@ -242,13 +243,13 @@ class EditorViewModel(
                 savePostcardUseCase(completedPostcard)
                     .onSuccess {
                         _state.value = currentState.copy(isSaving = false)
-                        _effect.emit(EditorEffect.ShowSuccess("Postcard saved"))
+                        _effect.emit(EditorEffect.ShowSnackbar(SnackbarMessages.success("Postcard saved")))
                         _effect.emit(EditorEffect.NavigateToPreview)
                     }
                     .onFailure { error ->
                         _state.value = currentState.copy(isSaving = false)
-                        _effect.emit(EditorEffect.ShowError(
-                            error.message ?: "Failed to save postcard"
+                        _effect.emit(EditorEffect.ShowSnackbar(
+                            SnackbarMessages.error(error.message ?: "Failed to save postcard")
                         ))
                     }
             }

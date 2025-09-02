@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import solutions.appme.nosticard.data.repository.BillingRepository
 import solutions.appme.nosticard.data.repository.PurchaseResult
+import solutions.appme.nosticard.ui.components.SnackbarMessages
 
 class SettingsViewModel(
     private val billingRepository: BillingRepository
@@ -75,8 +76,8 @@ class SettingsViewModel(
                     }
                     .onFailure { error ->
                         _state.value = currentState.copy(isProcessingPurchase = false)
-                        _effect.emit(SettingsEffect.ShowError(
-                            error.message ?: "Purchase failed"
+                        _effect.emit(SettingsEffect.ShowSnackbar(
+                            SnackbarMessages.error(error.message ?: "Purchase failed")
                         ))
                     }
             }
@@ -96,8 +97,8 @@ class SettingsViewModel(
                     }
                     .onFailure { error ->
                         _state.value = currentState.copy(isProcessingPurchase = false)
-                        _effect.emit(SettingsEffect.ShowError(
-                            error.message ?: "Purchase failed"
+                        _effect.emit(SettingsEffect.ShowSnackbar(
+                            SnackbarMessages.error(error.message ?: "Purchase failed")
                         ))
                     }
             }
@@ -119,12 +120,12 @@ class SettingsViewModel(
                         } else {
                             "No purchases found to restore"
                         }
-                        _effect.emit(SettingsEffect.ShowSuccess(message))
+                        _effect.emit(SettingsEffect.ShowSnackbar(SnackbarMessages.success(message)))
                     }
                     .onFailure { error ->
                         _state.value = currentState.copy(isRestoringPurchases = false)
-                        _effect.emit(SettingsEffect.ShowError(
-                            error.message ?: "Failed to restore purchases"
+                        _effect.emit(SettingsEffect.ShowSnackbar(
+                            SnackbarMessages.error(error.message ?: "Failed to restore purchases")
                         ))
                     }
             }
@@ -134,16 +135,16 @@ class SettingsViewModel(
     private suspend fun handlePurchaseResult(result: PurchaseResult) {
         when (result) {
             is PurchaseResult.Success -> {
-                _effect.emit(SettingsEffect.ShowSuccess("Purchase successful!"))
+                _effect.emit(SettingsEffect.ShowSnackbar(SnackbarMessages.success("Purchase successful!")))
             }
             is PurchaseResult.Error -> {
-                _effect.emit(SettingsEffect.ShowError(result.message))
+                _effect.emit(SettingsEffect.ShowSnackbar(SnackbarMessages.error(result.message)))
             }
             is PurchaseResult.Cancelled -> {
                 // Don't show error for user cancellation
             }
             is PurchaseResult.AlreadyOwned -> {
-                _effect.emit(SettingsEffect.ShowSuccess("You already own this product"))
+                _effect.emit(SettingsEffect.ShowSnackbar(SnackbarMessages.success("You already own this product")))
             }
         }
     }

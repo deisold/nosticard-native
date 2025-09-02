@@ -1,6 +1,7 @@
 package solutions.appme.nosticard.features.settings.viewmodel
 
 import solutions.appme.nosticard.data.repository.BillingProduct
+import solutions.appme.nosticard.ui.components.SnackbarMessage
 
 sealed class SettingsState {
     object Loading : SettingsState()
@@ -30,8 +31,7 @@ sealed class SettingsIntent {
 }
 
 sealed class SettingsEffect {
-    data class ShowError(val message: String) : SettingsEffect()
-    data class ShowSuccess(val message: String) : SettingsEffect()
+    data class ShowSnackbar(val message: SnackbarMessage) : SettingsEffect()
     data class ShowPurchaseDialog(val product: BillingProduct) : SettingsEffect()
     data class OpenUrl(val url: String) : SettingsEffect()
     data class SendEmail(val email: String, val subject: String) : SettingsEffect()

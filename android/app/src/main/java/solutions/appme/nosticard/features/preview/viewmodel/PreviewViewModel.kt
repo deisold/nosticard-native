@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import solutions.appme.nosticard.features.preview.domain.ExportPostcardUseCase
 import solutions.appme.nosticard.features.preview.domain.SharePostcardUseCase
+import solutions.appme.nosticard.ui.components.SnackbarMessages
 
 class PreviewViewModel(
     private val exportPostcardUseCase: ExportPostcardUseCase,
@@ -55,12 +56,12 @@ class PreviewViewModel(
                             isExporting = false,
                             exportedImagePath = exportPath
                         )
-                        _effect.emit(PreviewEffect.ShowSuccess("Image exported successfully"))
+                        _effect.emit(PreviewEffect.ShowSnackbar(SnackbarMessages.success("Image exported successfully")))
                     }
                     .onFailure { error ->
                         _state.value = currentState.copy(isExporting = false)
-                        _effect.emit(PreviewEffect.ShowError(
-                            error.message ?: "Failed to export image"
+                        _effect.emit(PreviewEffect.ShowSnackbar(
+                            SnackbarMessages.error(error.message ?: "Failed to export image")
                         ))
                     }
             }
@@ -89,12 +90,12 @@ class PreviewViewModel(
                             isExporting = false,
                             exportedPdfPath = pdfPath
                         )
-                        _effect.emit(PreviewEffect.ShowSuccess("PDF exported successfully"))
+                        _effect.emit(PreviewEffect.ShowSnackbar(SnackbarMessages.success("PDF exported successfully")))
                     }
                     .onFailure { error ->
                         _state.value = currentState.copy(isExporting = false)
-                        _effect.emit(PreviewEffect.ShowError(
-                            error.message ?: "Failed to export PDF"
+                        _effect.emit(PreviewEffect.ShowSnackbar(
+                            SnackbarMessages.error(error.message ?: "Failed to export PDF")
                         ))
                     }
             }
@@ -107,7 +108,7 @@ class PreviewViewModel(
             val imagePath = currentState.exportedImagePath 
                 ?: run {
                     viewModelScope.launch {
-                        _effect.emit(PreviewEffect.ShowError("Please export image first"))
+                        _effect.emit(PreviewEffect.ShowSnackbar(SnackbarMessages.error("Please export image first")))
                     }
                     return
                 }
@@ -121,8 +122,8 @@ class PreviewViewModel(
                     }
                     .onFailure { error ->
                         _state.value = currentState.copy(isSharing = false)
-                        _effect.emit(PreviewEffect.ShowError(
-                            error.message ?: "Failed to share image"
+                        _effect.emit(PreviewEffect.ShowSnackbar(
+                            SnackbarMessages.error(error.message ?: "Failed to share image")
                         ))
                     }
             }
@@ -135,7 +136,7 @@ class PreviewViewModel(
             val pdfPath = currentState.exportedPdfPath 
                 ?: run {
                     viewModelScope.launch {
-                        _effect.emit(PreviewEffect.ShowError("Please export PDF first"))
+                        _effect.emit(PreviewEffect.ShowSnackbar(SnackbarMessages.error("Please export PDF first")))
                     }
                     return
                 }
@@ -149,8 +150,8 @@ class PreviewViewModel(
                     }
                     .onFailure { error ->
                         _state.value = currentState.copy(isSharing = false)
-                        _effect.emit(PreviewEffect.ShowError(
-                            error.message ?: "Failed to share PDF"
+                        _effect.emit(PreviewEffect.ShowSnackbar(
+                            SnackbarMessages.error(error.message ?: "Failed to share PDF")
                         ))
                     }
             }

@@ -16,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import solutions.appme.nosticard.features.home.view.components.PostcardItem
 import solutions.appme.nosticard.features.home.viewmodel.*
+import solutions.appme.nosticard.ui.components.showSnackbar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,17 +28,15 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
     
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is HomeEffect.NavigateToEditor -> onNavigateToEditor()
                 is HomeEffect.NavigateToPostcard -> onNavigateToPostcard(effect.postcardId)
-                is HomeEffect.ShowError -> {
-                    // TODO: Show error snackbar
-                }
-                is HomeEffect.ShowSuccess -> {
-                    // TODO: Show success snackbar
+                is HomeEffect.ShowSnackbar -> {
+                    showSnackbar(snackbarHostState, effect.message)
                 }
             }
         }
@@ -60,7 +59,8 @@ fun HomeScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Create New Postcard")
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         HomeContent(
             state = state,
