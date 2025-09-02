@@ -19,7 +19,10 @@ fun NostiCardNavigation(navController: NavHostController) {
         composable(Screen.Home.route) {
             HomeScreen(
                 onNavigateToEditor = {
-                    navController.navigate(Screen.Editor.route)
+                    navController.navigate(Screen.Editor.createRoute())
+                },
+                onNavigateToEditorWithImage = { imageUri ->
+                    navController.navigate(Screen.Editor.createRoute(imageUri = imageUri))
                 },
                 onNavigateToMyCards = {
                     navController.navigate(Screen.MyCards.route)
@@ -38,8 +41,12 @@ fun NostiCardNavigation(navController: NavHostController) {
             arguments = Screen.Editor.arguments
         ) { backStackEntry ->
             val postcardId = backStackEntry.arguments?.getString("postcardId")
+            val imageUri = backStackEntry.arguments?.getString("imageUri")?.let { 
+                java.net.URLDecoder.decode(it, "UTF-8") 
+            }
             EditorScreen(
                 postcardId = postcardId,
+                initialImageUri = imageUri,
                 onNavigateBack = {
                     navController.popBackStack()
                 },

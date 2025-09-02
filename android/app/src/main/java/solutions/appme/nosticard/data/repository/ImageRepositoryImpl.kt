@@ -2,11 +2,14 @@ package solutions.appme.nosticard.data.repository
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
+import android.net.Uri
+import android.provider.MediaStore
 import solutions.appme.nosticard.data.model.FilterSettings
 import solutions.appme.nosticard.data.model.FilterType
 import solutions.appme.nosticard.data.model.FrameType
@@ -16,6 +19,21 @@ import java.io.FileOutputStream
 class ImageRepositoryImpl(
     private val context: Context
 ) : ImageRepository {
+    
+    override suspend fun loadImageFromUri(uri: Uri): Result<Bitmap> {
+        return try {
+            val bitmap = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                val source = android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
+                android.graphics.ImageDecoder.decodeBitmap(source)
+            } else {
+                @Suppress("DEPRECATION")
+                MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+            }
+            Result.success(bitmap)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
     
     override suspend fun applyFilter(
         bitmap: Bitmap,

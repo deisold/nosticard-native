@@ -17,11 +17,13 @@ import org.koin.androidx.compose.koinViewModel
 import solutions.appme.nosticard.features.home.view.components.PostcardItem
 import solutions.appme.nosticard.features.home.viewmodel.*
 import solutions.appme.nosticard.ui.components.showSnackbar
+import solutions.appme.nosticard.ui.components.ImagePickerBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToEditor: () -> Unit,
+    onNavigateToEditorWithImage: (String) -> Unit,
     onNavigateToMyCards: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPostcard: (String) -> Unit,
@@ -29,6 +31,7 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showImagePicker by remember { mutableStateOf(false) }
     
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
@@ -55,7 +58,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { viewModel.handleIntent(HomeIntent.NavigateToEditor) }
+                onClick = { showImagePicker = true }
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Create New Postcard")
             }
@@ -66,7 +69,16 @@ fun HomeScreen(
             state = state,
             onIntent = viewModel::handleIntent,
             onNavigateToMyCards = onNavigateToMyCards,
+            onShowImagePicker = { showImagePicker = true },
             modifier = Modifier.padding(paddingValues)
+        )
+        
+        ImagePickerBottomSheet(
+            isVisible = showImagePicker,
+            onImageSelected = { uri ->
+                onNavigateToEditorWithImage(uri.toString())
+            },
+            onDismiss = { showImagePicker = false }
         )
     }
 }
@@ -76,6 +88,7 @@ private fun HomeContent(
     state: HomeState,
     onIntent: (HomeIntent) -> Unit,
     onNavigateToMyCards: () -> Unit,
+    onShowImagePicker: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (state) {
@@ -90,7 +103,7 @@ private fun HomeContent(
         
         is HomeState.Empty -> {
             EmptyStateContent(
-                onCreateFirst = { onIntent(HomeIntent.NavigateToEditor) },
+                onCreateFirst = onShowImagePicker,
                 modifier = modifier
             )
         }

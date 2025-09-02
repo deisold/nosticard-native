@@ -11,19 +11,28 @@ sealed class Screen(
     object Home : Screen("home")
     
     object Editor : Screen(
-        route = "editor?postcardId={postcardId}",
+        route = "editor?postcardId={postcardId}&imageUri={imageUri}",
         arguments = listOf(
             navArgument("postcardId") {
+                type = NavType.StringType
+                nullable = true
+            },
+            navArgument("imageUri") {
                 type = NavType.StringType
                 nullable = true
             }
         )
     ) {
-        fun createRoute(postcardId: String? = null): String {
-            return if (postcardId != null) {
-                "editor?postcardId=$postcardId"
-            } else {
-                "editor"
+        fun createRoute(postcardId: String? = null, imageUri: String? = null): String {
+            return buildString {
+                append("editor")
+                val params = mutableListOf<String>()
+                postcardId?.let { params.add("postcardId=$it") }
+                imageUri?.let { params.add("imageUri=${java.net.URLEncoder.encode(it, "UTF-8")}") }
+                if (params.isNotEmpty()) {
+                    append("?")
+                    append(params.joinToString("&"))
+                }
             }
         }
     }

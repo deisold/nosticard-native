@@ -1,7 +1,9 @@
 package solutions.appme.nosticard.features.editor.view
 
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -15,17 +17,27 @@ import org.koin.core.parameter.parametersOf
 import solutions.appme.nosticard.features.editor.view.components.*
 import solutions.appme.nosticard.features.editor.viewmodel.*
 import solutions.appme.nosticard.ui.components.showSnackbar
+import solutions.appme.nosticard.ui.components.ImagePickerBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorScreen(
     postcardId: String? = null,
+    initialImageUri: String? = null,
     onNavigateBack: () -> Unit,
     onNavigateToPreview: (String) -> Unit,
     viewModel: EditorViewModel = koinViewModel { parametersOf(postcardId) }
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var showImagePicker by remember { mutableStateOf(false) }
+    
+    // Load initial image if provided
+    LaunchedEffect(initialImageUri) {
+        initialImageUri?.let { uri ->
+            viewModel.handleIntent(EditorIntent.LoadImage(uri))
+        }
+    }
     
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
@@ -35,8 +47,8 @@ fun EditorScreen(
                 is EditorEffect.ShowSnackbar -> {
                     showSnackbar(snackbarHostState, effect.message)
                 }
-                is EditorEffect.RequestPermission -> {
-                    // TODO: Request permission
+                is EditorEffect.LaunchPhotoPicker -> {
+                    showImagePicker = true
                 }
             }
         }
@@ -48,7 +60,7 @@ fun EditorScreen(
                 title = { Text("Edit Postcard") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -66,6 +78,14 @@ fun EditorScreen(
             state = state,
             onIntent = viewModel::handleIntent,
             modifier = Modifier.padding(paddingValues)
+        )
+        
+        ImagePickerBottomSheet(
+            isVisible = showImagePicker,
+            onImageSelected = { uri ->
+                viewModel.handleIntent(EditorIntent.LoadImage(uri.toString()))
+            },
+            onDismiss = { showImagePicker = false }
         )
     }
 }
@@ -125,6 +145,7 @@ private fun EditorReadyContent(
                 postcard = state.postcard,
                 previewBitmap = state.previewBitmap,
                 isProcessing = state.isProcessing,
+                onSelectImage = { onIntent(EditorIntent.SelectImage) },
                 modifier = Modifier.fillMaxSize()
             )
         }

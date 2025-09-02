@@ -40,11 +40,12 @@ sealed class EditorIntent {
     object SaveDraft : EditorIntent()
     object SaveCompleted : EditorIntent()
     object NavigateToPreview : EditorIntent()
+    object SelectImage : EditorIntent()
 }
 
 sealed class EditorEffect {
     data class ShowSnackbar(val message: SnackbarMessage) : EditorEffect()
     object NavigateToPreview : EditorEffect()
     object NavigateBack : EditorEffect()
-    data class RequestPermission(val permission: String) : EditorEffect()
+    object LaunchPhotoPicker : EditorEffect()
 }

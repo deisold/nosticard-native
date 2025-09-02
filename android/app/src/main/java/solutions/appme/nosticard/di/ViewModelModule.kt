@@ -21,6 +21,7 @@ val viewModelModule = module {
     viewModel { parameters ->
         EditorViewModel(
             postcardId = parameters.getOrNull(),
+            imageRepository = get(),
             applyFilterUseCase = get(),
             savePostcardUseCase = get()
         )

@@ -6,13 +6,16 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import solutions.appme.nosticard.data.model.*
+import solutions.appme.nosticard.data.repository.ImageRepository
 import solutions.appme.nosticard.features.editor.domain.ApplyFilterUseCase
 import solutions.appme.nosticard.features.editor.domain.SavePostcardUseCase
 import solutions.appme.nosticard.ui.components.SnackbarMessages
+import android.net.Uri
 import java.util.*
 
 class EditorViewModel(
     private val postcardId: String?,
+    private val imageRepository: ImageRepository,
     private val applyFilterUseCase: ApplyFilterUseCase,
     private val savePostcardUseCase: SavePostcardUseCase
 ) : ViewModel() {
@@ -41,6 +44,7 @@ class EditorViewModel(
             is EditorIntent.SaveDraft -> saveDraft()
             is EditorIntent.SaveCompleted -> saveCompleted()
             is EditorIntent.NavigateToPreview -> navigateToPreview()
+            is EditorIntent.SelectImage -> selectImage()
         }
     }
 
@@ -93,12 +97,34 @@ class EditorViewModel(
                 isProcessing = true
             )
             
-            // TODO: Load actual bitmap from imagePath
-            // For now, just update the state
-            _state.value = currentState.copy(
-                postcard = updatedPostcard,
-                isProcessing = false
-            )
+            viewModelScope.launch {
+                try {
+                    val uri = Uri.parse(imagePath)
+                    imageRepository.loadImageFromUri(uri)
+                        .onSuccess { bitmap ->
+                            _state.value = currentState.copy(
+                                postcard = updatedPostcard,
+                                originalBitmap = bitmap,
+                                previewBitmap = bitmap,
+                                isProcessing = false
+                            )
+                            _effect.emit(EditorEffect.ShowSnackbar(
+                                SnackbarMessages.success("Image loaded successfully")
+                            ))
+                        }
+                        .onFailure { error ->
+                            _state.value = currentState.copy(isProcessing = false)
+                            _effect.emit(EditorEffect.ShowSnackbar(
+                                SnackbarMessages.error("Failed to load image: ${error.message}")
+                            ))
+                        }
+                } catch (e: Exception) {
+                    _state.value = currentState.copy(isProcessing = false)
+                    _effect.emit(EditorEffect.ShowSnackbar(
+                        SnackbarMessages.error("Invalid image URI")
+                    ))
+                }
+            }
         }
     }
 
@@ -264,6 +290,12 @@ class EditorViewModel(
     private fun navigateToPreview() {
         viewModelScope.launch {
             _effect.emit(EditorEffect.NavigateToPreview)
+        }
+    }
+    
+    private fun selectImage() {
+        viewModelScope.launch {
+            _effect.emit(EditorEffect.LaunchPhotoPicker)
         }
     }
 }

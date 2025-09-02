@@ -1,11 +1,13 @@
 package solutions.appme.nosticard.data.repository
 
 import android.graphics.Bitmap
+import android.net.Uri
 import solutions.appme.nosticard.data.model.FilterSettings
 import solutions.appme.nosticard.data.model.FilterType
 import solutions.appme.nosticard.data.model.FrameType
 
 interface ImageRepository {
+    suspend fun loadImageFromUri(uri: Uri): Result<Bitmap>
     suspend fun applyFilter(
         bitmap: Bitmap,
         filterType: FilterType,
