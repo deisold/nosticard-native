@@ -13,23 +13,28 @@ import android.provider.MediaStore
 import solutions.appme.nosticard.data.model.FilterSettings
 import solutions.appme.nosticard.data.model.FilterType
 import solutions.appme.nosticard.data.model.FrameType
+import solutions.appme.nosticard.utils.ImageCropUtils
 import java.io.File
 import java.io.FileOutputStream
 
 class ImageRepositoryImpl(
-    private val context: Context
+    private val context: Context,
+    private val imageCropUtils: ImageCropUtils
 ) : ImageRepository {
     
     override suspend fun loadImageFromUri(uri: Uri): Result<Bitmap> {
         return try {
-            val bitmap = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            val originalBitmap = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
                 val source = android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
                 android.graphics.ImageDecoder.decodeBitmap(source)
             } else {
                 @Suppress("DEPRECATION")
                 MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
             }
-            Result.success(bitmap)
+            
+            // Apply center-crop to postcard ratio (4:3)
+            val croppedBitmap = imageCropUtils.cropToPostcardRatio(originalBitmap)
+            Result.success(croppedBitmap)
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -3,8 +3,15 @@ package solutions.appme.nosticard.di
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import solutions.appme.nosticard.data.repository.*
+import solutions.appme.nosticard.utils.ImageCropUtils
+import solutions.appme.nosticard.utils.ImageCropUtilsImpl
 
 val dataModule = module {
+    
+    // Utilities
+    single<ImageCropUtils> {
+        ImageCropUtilsImpl()
+    }
     
     // Storage Repository
     single<StorageRepository> {
@@ -16,7 +23,8 @@ val dataModule = module {
     // Image Repository
     single<ImageRepository> {
         ImageRepositoryImpl(
-            context = androidContext()
+            context = androidContext(),
+            imageCropUtils = get()
         )
     }
     
