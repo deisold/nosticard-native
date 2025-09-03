@@ -83,10 +83,9 @@ class ImageRepositoryImpl(
             }
             
             val filteredBitmap = when (filterType) {
-                FilterType.NONE -> softwareBitmap
                 FilterType.CLASSIC_BW -> applyBlackAndWhite(softwareBitmap)
                 FilterType.SEPIA_MEMORIES -> applySepia(softwareBitmap)
-                FilterType.FADED_COLOR -> applyFaded(softwareBitmap)
+                FilterType.VINTAGE_WARMTH -> applyVintageWarmth(softwareBitmap)
             }
             
             // Apply vintage effects
@@ -212,14 +211,22 @@ class ImageRepositoryImpl(
         return sepiaBitmap
     }
     
-    private fun applyFaded(bitmap: Bitmap): Bitmap {
-        val fadedBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val canvas = Canvas(fadedBitmap)
-        val paint = Paint().apply {
-            alpha = 180 // Reduce opacity for faded effect
+    private fun applyVintageWarmth(bitmap: Bitmap): Bitmap {
+        val warmBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(warmBitmap)
+        val paint = Paint()
+        val colorMatrix = ColorMatrix().apply {
+            // Apply warm tone filter with slight sepia and increased contrast
+            set(floatArrayOf(
+                1.2f, 0.1f, 0f, 0f, 10f,
+                0f, 1.1f, 0f, 0f, 5f,
+                0f, 0f, 0.8f, 0f, 0f,
+                0f, 0f, 0f, 1f, 0f
+            ))
         }
+        paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
         canvas.drawBitmap(bitmap, 0f, 0f, paint)
-        return fadedBitmap
+        return warmBitmap
     }
     
     private fun applyVintageEffects(bitmap: Bitmap, settings: FilterSettings): Bitmap {

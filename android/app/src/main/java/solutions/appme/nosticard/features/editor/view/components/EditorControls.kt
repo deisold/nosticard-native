@@ -241,10 +241,9 @@ private fun FilterSettingsControls(
 // Extension properties for display names
 private val FilterType.displayName: String
     get() = when (this) {
-        FilterType.NONE -> "None"
         FilterType.CLASSIC_BW -> "Classic B&W"
         FilterType.SEPIA_MEMORIES -> "Sepia"
-        FilterType.FADED_COLOR -> "Faded"
+        FilterType.VINTAGE_WARMTH -> "Vintage Warmth"
     }
 
 private val FrameType.displayName: String

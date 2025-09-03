@@ -92,7 +92,7 @@ class EditorViewModel(
             title = "New Postcard",
             imagePath = "",
             text = "",
-            filterType = FilterType.NONE,
+            filterType = FilterType.CLASSIC_BW,
             frameType = FrameType.NONE,
             textPosition = TextPosition(0.5f, 0.8f),
             textAlignment = TextAlignment.LEFT,
@@ -145,12 +145,19 @@ class EditorViewModel(
                                 // Save the updated postcard with persistent path immediately
                                 savePostcardUseCase(updatedPostcard)
                                 
-                                _state.value = currentState.copy(
+                                val updatedState = currentState.copy(
                                     postcard = updatedPostcard,
                                     originalBitmap = bitmap,
                                     previewBitmap = bitmap,
                                     isProcessing = false
                                 )
+                                _state.value = updatedState
+                                
+                                // Always generate preview with filters applied for new images
+                                viewModelScope.launch {
+                                    _state.value = updatedState.copy(isProcessing = true)
+                                    generateCompositePreview(updatedState.copy(isProcessing = true))
+                                }
                             }
                             .onFailure { error ->
                                 _state.value = currentState.copy(isProcessing = false)
@@ -171,14 +178,10 @@ class EditorViewModel(
                                 )
                                 _state.value = updatedState
                                 
-                                // If this draft has filters, frames, or text, regenerate preview
-                                if (updatedState.selectedFilter != FilterType.NONE || 
-                                    updatedState.selectedFrame != FrameType.NONE || 
-                                    updatedState.textInput.isNotBlank()) {
-                                    viewModelScope.launch {
-                                        _state.value = updatedState.copy(isProcessing = true)
-                                        generateCompositePreview(updatedState.copy(isProcessing = true))
-                                    }
+                                // Always regenerate preview with filters applied
+                                viewModelScope.launch {
+                                    _state.value = updatedState.copy(isProcessing = true)
+                                    generateCompositePreview(updatedState.copy(isProcessing = true))
                                 }
                             } else {
                                 _state.value = currentState.copy(isProcessing = false)
@@ -350,23 +353,21 @@ class EditorViewModel(
         try {
             var workingBitmap = state.originalBitmap!!
             
-            // Step 1: Apply filter
-            if (state.selectedFilter != FilterType.NONE) {
-                val filterResult = applyFilterUseCase(
-                    bitmap = workingBitmap,
-                    filterType = state.selectedFilter,
-                    settings = state.filterSettings
-                )
-                
-                if (filterResult.isSuccess) {
-                    workingBitmap = filterResult.getOrThrow()
-                } else {
-                    _state.value = state.copy(isProcessing = false)
-                    _effect.emit(EditorEffect.ShowSnackbar(
-                        SnackbarMessages.error("Filter failed: ${filterResult.exceptionOrNull()?.message}")
-                    ))
-                    return
-                }
+            // Step 1: Apply filter (always applied since we removed NONE option)
+            val filterResult = applyFilterUseCase(
+                bitmap = workingBitmap,
+                filterType = state.selectedFilter,
+                settings = state.filterSettings
+            )
+            
+            if (filterResult.isSuccess) {
+                workingBitmap = filterResult.getOrThrow()
+            } else {
+                _state.value = state.copy(isProcessing = false)
+                _effect.emit(EditorEffect.ShowSnackbar(
+                    SnackbarMessages.error("Filter failed: ${filterResult.exceptionOrNull()?.message}")
+                ))
+                return
             }
             
             // Step 2: Apply frame

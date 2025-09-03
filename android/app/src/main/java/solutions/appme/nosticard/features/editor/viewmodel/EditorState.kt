@@ -15,7 +15,7 @@ sealed class EditorState {
         val isSaving: Boolean = false,
         val filterSettings: FilterSettings = FilterSettings(),
         val textInput: String = "",
-        val selectedFilter: FilterType = FilterType.NONE,
+        val selectedFilter: FilterType = FilterType.CLASSIC_BW,
         val selectedFrame: FrameType = FrameType.NONE,
         val textAlignment: TextAlignment = TextAlignment.LEFT,
         val textPosition: TextPosition = TextPosition(0.5f, 0.8f)

@@ -27,10 +27,9 @@ data class TextPosition(
 )
 
 enum class FilterType {
-    NONE,
     CLASSIC_BW,
     SEPIA_MEMORIES,
-    FADED_COLOR
+    VINTAGE_WARMTH
 }
 
 enum class FrameType {
