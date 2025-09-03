@@ -28,8 +28,7 @@ fun PostcardPreview(
 ) {
     Box(
         modifier = modifier
-            .aspectRatio(4f / 3f)
-            .background(Color.White),
+            .aspectRatio(4f / 3f),
         contentAlignment = Alignment.Center
     ) {
         if (previewBitmap != null) {

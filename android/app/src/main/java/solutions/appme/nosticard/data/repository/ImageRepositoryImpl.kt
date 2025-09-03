@@ -248,13 +248,112 @@ class ImageRepositoryImpl(
     }
     
     private fun addDeckleEdge(bitmap: Bitmap): Bitmap {
-        // TODO: Implement deckle edge effect
-        return bitmap
+        val borderSize = 30
+        val framedBitmap = createBitmap(
+            bitmap.width + borderSize * 2,
+            bitmap.height + borderSize * 2,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(framedBitmap)
+        canvas.drawColor(Color.WHITE)
+        
+        // Create rough, torn edge effect
+        val paint = Paint().apply {
+            color = Color.WHITE
+            isAntiAlias = false
+            strokeWidth = 3f
+        }
+        
+        // Create jagged edge by drawing irregular border
+        val path = android.graphics.Path()
+        val random = kotlin.random.Random(42) // Fixed seed for consistent results
+        
+        // Top edge
+        path.moveTo(0f, borderSize.toFloat())
+        for (x in 0..bitmap.width + borderSize * 2 step 8) {
+            val jitter = random.nextFloat() * 8 - 4
+            path.lineTo(x.toFloat(), borderSize + jitter)
+        }
+        
+        // Right edge
+        path.lineTo((bitmap.width + borderSize * 2).toFloat(), borderSize.toFloat())
+        for (y in borderSize..bitmap.height + borderSize step 8) {
+            val jitter = random.nextFloat() * 8 - 4
+            path.lineTo(bitmap.width + borderSize * 2 - jitter, y.toFloat())
+        }
+        
+        // Bottom edge
+        path.lineTo((bitmap.width + borderSize).toFloat(), (bitmap.height + borderSize * 2).toFloat())
+        for (x in bitmap.width + borderSize downTo 0 step 8) {
+            val jitter = random.nextFloat() * 8 - 4
+            path.lineTo(x.toFloat(), bitmap.height + borderSize * 2 - jitter)
+        }
+        
+        // Left edge
+        path.lineTo(0f, (bitmap.height + borderSize).toFloat())
+        for (y in bitmap.height + borderSize downTo borderSize step 8) {
+            val jitter = random.nextFloat() * 8 - 4
+            path.lineTo(jitter, y.toFloat())
+        }
+        
+        path.close()
+        canvas.clipPath(path)
+        canvas.drawBitmap(bitmap, borderSize.toFloat(), borderSize.toFloat(), null)
+        
+        return framedBitmap
     }
     
     private fun addStampEdge(bitmap: Bitmap): Bitmap {
-        // TODO: Implement stamp edge effect
-        return bitmap
+        val borderSize = 25
+        val framedBitmap = createBitmap(
+            bitmap.width + borderSize * 2,
+            bitmap.height + borderSize * 2,
+            Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(framedBitmap)
+        canvas.drawColor(Color.WHITE)
+        
+        // First draw the image with border
+        canvas.drawBitmap(bitmap, borderSize.toFloat(), borderSize.toFloat(), null)
+        
+        // Create stamp-like scalloped border by cutting out scalloped shapes from the white border
+        val scallop = 6f
+        val spacing = 12f
+        val paint = Paint().apply {
+            color = Color.TRANSPARENT
+            isAntiAlias = true
+            xfermode = android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR)
+        }
+        
+        // Top edge scallops
+        var x = borderSize.toFloat()
+        while (x < bitmap.width + borderSize) {
+            canvas.drawCircle(x, borderSize / 2f, scallop, paint)
+            x += spacing
+        }
+        
+        // Right edge scallops
+        var y = borderSize.toFloat()
+        while (y < bitmap.height + borderSize) {
+            canvas.drawCircle(bitmap.width + borderSize + borderSize / 2f, y, scallop, paint)
+            y += spacing
+        }
+        
+        // Bottom edge scallops
+        x = borderSize.toFloat()
+        while (x < bitmap.width + borderSize) {
+            canvas.drawCircle(x, bitmap.height + borderSize + borderSize / 2f, scallop, paint)
+            x += spacing
+        }
+        
+        // Left edge scallops
+        y = borderSize.toFloat()
+        while (y < bitmap.height + borderSize) {
+            canvas.drawCircle(borderSize / 2f, y, scallop, paint)
+            y += spacing
+        }
+        
+        return framedBitmap
     }
     
     private fun addWatermark(bitmap: Bitmap): Bitmap {

@@ -1,6 +1,11 @@
 package solutions.appme.nosticard.features.editor.view
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
@@ -8,6 +13,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
@@ -29,31 +37,32 @@ fun EditorScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var showImagePicker by remember { mutableStateOf(false) }
-    
-    // Load initial image if provided
+
     LaunchedEffect(initialImageUri) {
-        initialImageUri?.let { uri ->
-            viewModel.handleIntent(EditorIntent.LoadImage(uri))
-        }
+        initialImageUri?.let { viewModel.handleIntent(EditorIntent.LoadImage(it)) }
     }
-    
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is EditorEffect.NavigateBack -> onNavigateBack()
                 is EditorEffect.NavigateToPreview -> onNavigateToPreview("")
-                is EditorEffect.ShowSnackbar -> {
-                    showSnackbar(snackbarHostState, effect.message)
-                }
-                is EditorEffect.LaunchPhotoPicker -> {
-                    showImagePicker = true
-                }
+                is EditorEffect.ShowSnackbar -> showSnackbar(snackbarHostState, effect.message)
+                is EditorEffect.LaunchPhotoPicker -> showImagePicker = true
             }
         }
     }
-    
+
     Scaffold(
-        topBar = {
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        //contentWindowInsets = WindowInsets.safeDrawing // handle status/nav bars
+    ) { innerPadding ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding) // ← keeps everything inside safe area
+        ) {
+            // TOP APP BAR is part of the layout → content cannot be behind it
             TopAppBar(
                 title = { Text("Edit Postcard") },
                 navigationIcon = {
@@ -62,161 +71,116 @@ fun EditorScreen(
                     }
                 },
                 actions = {
-                    IconButton(
-                        onClick = { viewModel.handleIntent(EditorIntent.SaveDraft) }
-                    ) {
+                    IconButton(onClick = { viewModel.handleIntent(EditorIntent.SaveDraft) }) {
                         Icon(Icons.Default.Star, contentDescription = "Save Draft")
                     }
+                },
+                colors = TopAppBarDefaults.topAppBarColors( // force opaque bar
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
+
+            // ------- EVERYTHING BELOW THE BAR -------
+            when (val s = state) {
+                is EditorState.Loading -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
                 }
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
-        EditorContent(
-            state = state,
-            onIntent = viewModel::handleIntent,
-            modifier = Modifier.padding(paddingValues)
-        )
-        
-        ImagePickerBottomSheet(
-            isVisible = showImagePicker,
-            onImageSelected = { uri ->
-                viewModel.handleIntent(EditorIntent.LoadImage(uri.toString()))
-            },
-            onDismiss = { showImagePicker = false }
-        )
-    }
-}
 
-@Composable
-private fun EditorContent(
-    state: EditorState,
-    onIntent: (EditorIntent) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    when (state) {
-        is EditorState.Loading -> {
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-        
-        is EditorState.Ready -> {
-            EditorReadyContent(
-                state = state,
-                onIntent = onIntent,
-                modifier = modifier
-            )
-        }
-        
-        is EditorState.Error -> {
-            ErrorContent(
-                message = state.message,
-                canRetry = state.canRetry,
-                onRetry = { /* TODO: Implement retry */ },
-                modifier = modifier
-            )
-        }
-    }
-}
+                is EditorState.Ready -> {
+                    // make body scrollable so big images/controls don’t push under system bars
+                    val scroll = rememberScrollState()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(scroll)
+                    ) {
+                        // Main editing area (the image) — firmly below the app bar
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                //.padding(16.dp)
+                        ) {
+                            PostcardPreview(
+                                postcard = s.postcard,
+                                previewBitmap = s.previewBitmap,
+                                isProcessing = s.isProcessing,
+                                onSelectImage = { viewModel.handleIntent(EditorIntent.SelectImage) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                        }
 
-@Composable
-private fun EditorReadyContent(
-    state: EditorState.Ready,
-    onIntent: (EditorIntent) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxSize()
-    ) {
-        // Main editing area
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(16.dp)
-        ) {
-            PostcardPreview(
-                postcard = state.postcard,
-                previewBitmap = state.previewBitmap,
-                isProcessing = state.isProcessing,
-                onSelectImage = { onIntent(EditorIntent.SelectImage) },
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-        
-        // Controls panel
-        EditorControls(
-            state = state,
-            onIntent = onIntent,
-            modifier = Modifier.fillMaxWidth()
-        )
-        
-        // Bottom actions
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            OutlinedButton(
-                onClick = { onIntent(EditorIntent.SaveDraft) },
-                modifier = Modifier.weight(1f),
-                enabled = !state.isSaving
-            ) {
-                if (state.isSaving) {
-                    CircularProgressIndicator(modifier = Modifier.size(16.dp))
-                } else {
-                    Text("Save Draft")
+                        // Controls
+                        EditorControls(
+                            state = s,
+                            onIntent = viewModel::handleIntent,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        )
+
+                        // Bottom actions, protected from gesture bar
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                                .windowInsetsPadding(WindowInsets.navigationBars),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { viewModel.handleIntent(EditorIntent.SaveDraft) },
+                                modifier = Modifier.weight(1f),
+                                enabled = !s.isSaving
+                            ) {
+                                if (s.isSaving) {
+                                    CircularProgressIndicator(Modifier.size(16.dp))
+                                } else {
+                                    Text("Save Draft")
+                                }
+                            }
+                            Button(
+                                onClick = { viewModel.handleIntent(EditorIntent.SaveCompleted) },
+                                modifier = Modifier.weight(1f),
+                                enabled = !s.isSaving
+                            ) {
+                                Text("Complete")
+                            }
+                        }
+                    }
+                }
+
+                is EditorState.Error -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text("Something went wrong", style = MaterialTheme.typography.titleLarge)
+                        Spacer(Modifier.height(8.dp))
+                        Text(s.message, style = MaterialTheme.typography.bodyMedium)
+                        if (s.canRetry) {
+                            Spacer(Modifier.height(16.dp))
+                            Button(onClick = { /* hook retry */ }) { Text("Try Again") }
+                        }
+                    }
                 }
             }
-            
-            Button(
-                onClick = { onIntent(EditorIntent.SaveCompleted) },
-                modifier = Modifier.weight(1f),
-                enabled = !state.isSaving
-            ) {
-                Text("Complete")
-            }
-        }
-    }
-}
 
-@Composable
-private fun ErrorContent(
-    message: String,
-    canRetry: Boolean,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Something went wrong",
-            style = MaterialTheme.typography.titleLarge
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        
-        if (canRetry) {
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Button(onClick = onRetry) {
-                Text("Try Again")
-            }
+            // Bottom sheet at the end so it’s not clipped by weights
+            ImagePickerBottomSheet(
+                isVisible = showImagePicker,
+                onImageSelected = { uri ->
+                    viewModel.handleIntent(EditorIntent.LoadImage(uri.toString()))
+                },
+                onDismiss = { showImagePicker = false }
+            )
         }
     }
 }
