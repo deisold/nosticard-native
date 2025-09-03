@@ -26,7 +26,8 @@ fun HomeScreen(
     onNavigateToEditorWithImage: (String) -> Unit,
     onNavigateToMyCards: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToPostcard: (String) -> Unit,
+    onNavigateToEditPostcard: (String) -> Unit,
+    onNavigateToPreview: (String) -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -37,7 +38,11 @@ fun HomeScreen(
         viewModel.effect.collect { effect ->
             when (effect) {
                 is HomeEffect.NavigateToEditor -> onNavigateToEditor()
-                is HomeEffect.NavigateToPostcard -> onNavigateToPostcard(effect.postcardId)
+                is HomeEffect.NavigateToPostcard -> {
+                    // Determine navigation based on postcard type - this logic should be in ViewModel
+                    // For now, assume it's going to editor (we'll fix this)
+                    onNavigateToEditPostcard(effect.postcardId)
+                }
                 is HomeEffect.ShowSnackbar -> {
                     showSnackbar(snackbarHostState, effect.message)
                 }

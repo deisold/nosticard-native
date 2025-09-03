@@ -30,7 +30,10 @@ fun NostiCardNavigation(navController: NavHostController) {
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
                 },
-                onNavigateToPostcard = { postcardId ->
+                onNavigateToEditPostcard = { postcardId ->
+                    navController.navigate(Screen.Editor.createRoute(postcardId = postcardId))
+                },
+                onNavigateToPreview = { postcardId ->
                     navController.navigate(Screen.Preview.createRoute(postcardId))
                 }
             )

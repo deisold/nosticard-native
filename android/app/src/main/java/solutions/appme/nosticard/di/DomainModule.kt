@@ -2,6 +2,7 @@ package solutions.appme.nosticard.di
 
 import org.koin.dsl.module
 import solutions.appme.nosticard.features.editor.domain.ApplyFilterUseCase
+import solutions.appme.nosticard.features.editor.domain.GetPostcardUseCase
 import solutions.appme.nosticard.features.editor.domain.SavePostcardUseCase
 import solutions.appme.nosticard.features.home.domain.GetPostcardsUseCase
 import solutions.appme.nosticard.features.home.domain.DeletePostcardUseCase
@@ -31,6 +32,12 @@ val domainModule = module {
     }
     
     // Editor Use Cases
+    factory<GetPostcardUseCase> {
+        GetPostcardUseCase(
+            storageRepository = get()
+        )
+    }
+    
     factory<ApplyFilterUseCase> {
         ApplyFilterUseCase(
             imageRepository = get()

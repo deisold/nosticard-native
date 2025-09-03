@@ -10,6 +10,7 @@ import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.net.Uri
 import android.provider.MediaStore
+import androidx.core.graphics.createBitmap
 import solutions.appme.nosticard.data.model.FilterSettings
 import solutions.appme.nosticard.data.model.FilterType
 import solutions.appme.nosticard.data.model.FrameType
@@ -24,19 +25,47 @@ class ImageRepositoryImpl(
     
     override suspend fun loadImageFromUri(uri: Uri): Result<Bitmap> {
         return try {
-            val originalBitmap = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                val source = android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
-                android.graphics.ImageDecoder.decodeBitmap(source)
-            } else {
-                @Suppress("DEPRECATION")
-                MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-            }
+            val originalBitmap = loadBitmapFromUri(uri)
             
             // Apply center-crop to postcard ratio (4:3)
             val croppedBitmap = imageCropUtils.cropToPostcardRatio(originalBitmap)
             Result.success(croppedBitmap)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+    
+    override suspend fun loadAndSaveImage(uri: Uri, postcardId: String): Result<Pair<Bitmap, String>> {
+        return try {
+            // Load bitmap from URI
+            val originalBitmap = loadBitmapFromUri(uri)
+            
+            // Apply center-crop to postcard ratio (4:3)
+            val croppedBitmap = imageCropUtils.cropToPostcardRatio(originalBitmap)
+            
+            // Save to internal storage
+            val fileName = "postcard_${postcardId}_${System.currentTimeMillis()}.jpg"
+            val imagesDir = File(context.filesDir, "images")
+            imagesDir.mkdirs()
+            val imageFile = File(imagesDir, fileName)
+            
+            FileOutputStream(imageFile).use { outputStream ->
+                croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+            }
+            
+            Result.success(Pair(croppedBitmap, imageFile.absolutePath))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    private fun loadBitmapFromUri(uri: Uri): Bitmap {
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            val source = android.graphics.ImageDecoder.createSource(context.contentResolver, uri)
+            android.graphics.ImageDecoder.decodeBitmap(source)
+        } else {
+            @Suppress("DEPRECATION")
+            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
         }
     }
     
@@ -179,7 +208,7 @@ class ImageRepositoryImpl(
     
     private fun addWhiteBorder(bitmap: Bitmap): Bitmap {
         val borderSize = 20
-        val framedBitmap = Bitmap.createBitmap(
+        val framedBitmap = createBitmap(
             bitmap.width + borderSize * 2,
             bitmap.height + borderSize * 2,
             Bitmap.Config.ARGB_8888
