@@ -92,39 +92,32 @@ fun EditorScreen(
                 }
 
                 is EditorState.Ready -> {
-                    // make body scrollable so big images/controls don’t push under system bars
-                    val scroll = rememberScrollState()
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(scroll)
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        // Main editing area (the image) — firmly below the app bar
-                        Box(
+                        // STICKY: Postcard preview at top - always visible
+                        PostcardPreview(
+                            postcard = s.postcard,
+                            previewBitmap = s.previewBitmap,
+                            isProcessing = s.isProcessing,
+                            onSelectImage = { viewModel.handleIntent(EditorIntent.SelectImage) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                //.padding(16.dp)
-                        ) {
-                            PostcardPreview(
-                                postcard = s.postcard,
-                                previewBitmap = s.previewBitmap,
-                                isProcessing = s.isProcessing,
-                                onSelectImage = { viewModel.handleIntent(EditorIntent.SelectImage) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            )
-                        }
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
 
-                        // Controls
+                        // SCROLLABLE: Only the middle controls section
+                        val scrollState = rememberScrollState()
                         EditorControls(
                             state = s,
                             onIntent = viewModel::handleIntent,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
+                                .weight(1f) // Takes remaining space between preview and buttons
+                                .verticalScroll(scrollState)
                         )
 
-                        // Bottom actions, protected from gesture bar
+                        // STICKY: Bottom action buttons - always visible
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
