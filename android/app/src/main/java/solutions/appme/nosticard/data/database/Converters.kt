@@ -3,13 +3,16 @@ package solutions.appme.nosticard.data.database
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import solutions.appme.nosticard.data.model.FilterSettings
 import solutions.appme.nosticard.data.model.FilterType
 import solutions.appme.nosticard.data.model.FrameType
 import solutions.appme.nosticard.data.model.TextAlignment
 import solutions.appme.nosticard.data.model.TextPosition
 import java.util.Date
 
-class Converters {
+class Converters(
+    private val gson: Gson
+) {
     
     @TypeConverter
     fun fromTimestamp(value: Long?): Date? {
@@ -53,11 +56,21 @@ class Converters {
     
     @TypeConverter
     fun fromTextPosition(value: TextPosition): String {
-        return Gson().toJson(value)
+        return gson.toJson(value)
     }
     
     @TypeConverter
     fun toTextPosition(value: String): TextPosition {
-        return Gson().fromJson(value, object : TypeToken<TextPosition>() {}.type)
+        return gson.fromJson(value, object : TypeToken<TextPosition>() {}.type)
+    }
+    
+    @TypeConverter
+    fun fromFilterSettings(value: FilterSettings): String {
+        return gson.toJson(value)
+    }
+    
+    @TypeConverter
+    fun toFilterSettings(value: String): FilterSettings {
+        return gson.fromJson(value, object : TypeToken<FilterSettings>() {}.type)
     }
 }

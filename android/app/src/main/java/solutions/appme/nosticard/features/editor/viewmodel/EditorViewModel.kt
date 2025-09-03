@@ -96,6 +96,7 @@ class EditorViewModel(
             frameType = FrameType.NONE,
             textPosition = TextPosition(0.5f, 0.8f),
             textAlignment = TextAlignment.LEFT,
+            filterSettings = FilterSettings(),
             isDraft = true,
             createdAt = Date(),
             updatedAt = Date()
@@ -111,7 +112,8 @@ class EditorViewModel(
             selectedFilter = postcard.filterType,
             selectedFrame = postcard.frameType,
             textAlignment = postcard.textAlignment,
-            textPosition = postcard.textPosition
+            textPosition = postcard.textPosition,
+            filterSettings = postcard.filterSettings
         )
         
         _state.value = initialState
@@ -162,11 +164,22 @@ class EditorViewModel(
                         if (file.exists()) {
                             val bitmap = android.graphics.BitmapFactory.decodeFile(imagePath)
                             if (bitmap != null) {
-                                _state.value = currentState.copy(
+                                val updatedState = currentState.copy(
                                     originalBitmap = bitmap,
                                     previewBitmap = bitmap,
                                     isProcessing = false
                                 )
+                                _state.value = updatedState
+                                
+                                // If this draft has filters, frames, or text, regenerate preview
+                                if (updatedState.selectedFilter != FilterType.NONE || 
+                                    updatedState.selectedFrame != FrameType.NONE || 
+                                    updatedState.textInput.isNotBlank()) {
+                                    viewModelScope.launch {
+                                        _state.value = updatedState.copy(isProcessing = true)
+                                        generateCompositePreview(updatedState.copy(isProcessing = true))
+                                    }
+                                }
                             } else {
                                 _state.value = currentState.copy(isProcessing = false)
                                 _effect.emit(EditorEffect.ShowSnackbar(
@@ -299,14 +312,19 @@ class EditorViewModel(
     private fun updateFilterSettings(settings: FilterSettings) {
         val currentState = _state.value
         if (currentState is EditorState.Ready && currentState.originalBitmap != null) {
-            _state.value = currentState.copy(
+            val updatedState = currentState.copy(
+                postcard = currentState.postcard.copy(
+                    filterSettings = settings,
+                    updatedAt = Date()
+                ),
                 filterSettings = settings,
                 isProcessing = true
             )
+            _state.value = updatedState
             
             viewModelScope.launch {
                 // Re-apply all effects with new settings
-                generateCompositePreview(currentState.copy(filterSettings = settings))
+                generateCompositePreview(updatedState)
             }
         }
     }

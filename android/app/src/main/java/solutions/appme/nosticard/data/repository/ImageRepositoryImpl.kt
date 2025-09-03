@@ -75,11 +75,18 @@ class ImageRepositoryImpl(
         settings: FilterSettings
     ): Result<Bitmap> {
         return try {
+            // Convert hardware bitmap to software bitmap for Canvas operations
+            val softwareBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
+                bitmap.copy(Bitmap.Config.ARGB_8888, false)
+            } else {
+                bitmap
+            }
+            
             val filteredBitmap = when (filterType) {
-                FilterType.NONE -> bitmap
-                FilterType.CLASSIC_BW -> applyBlackAndWhite(bitmap)
-                FilterType.SEPIA_MEMORIES -> applySepia(bitmap)
-                FilterType.FADED_COLOR -> applyFaded(bitmap)
+                FilterType.NONE -> softwareBitmap
+                FilterType.CLASSIC_BW -> applyBlackAndWhite(softwareBitmap)
+                FilterType.SEPIA_MEMORIES -> applySepia(softwareBitmap)
+                FilterType.FADED_COLOR -> applyFaded(softwareBitmap)
             }
             
             // Apply vintage effects
@@ -92,11 +99,18 @@ class ImageRepositoryImpl(
     
     override suspend fun applyFrame(bitmap: Bitmap, frameType: FrameType): Result<Bitmap> {
         return try {
+            // Convert hardware bitmap to software bitmap for Canvas operations
+            val softwareBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
+                bitmap.copy(Bitmap.Config.ARGB_8888, false)
+            } else {
+                bitmap
+            }
+            
             val framedBitmap = when (frameType) {
-                FrameType.NONE -> bitmap
-                FrameType.WHITE_BORDER -> addWhiteBorder(bitmap)
-                FrameType.DECKLE_EDGE -> addDeckleEdge(bitmap)
-                FrameType.STAMP_EDGE -> addStampEdge(bitmap)
+                FrameType.NONE -> softwareBitmap
+                FrameType.WHITE_BORDER -> addWhiteBorder(softwareBitmap)
+                FrameType.DECKLE_EDGE -> addDeckleEdge(softwareBitmap)
+                FrameType.STAMP_EDGE -> addStampEdge(softwareBitmap)
             }
             Result.success(framedBitmap)
         } catch (e: Exception) {
@@ -114,7 +128,14 @@ class ImageRepositoryImpl(
         alignment: String
     ): Result<Bitmap> {
         return try {
-            val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+            // Convert hardware bitmap to software bitmap for Canvas operations
+            val softwareBitmap = if (bitmap.config == Bitmap.Config.HARDWARE) {
+                bitmap.copy(Bitmap.Config.ARGB_8888, false)
+            } else {
+                bitmap
+            }
+            
+            val mutableBitmap = softwareBitmap.copy(Bitmap.Config.ARGB_8888, true)
             val canvas = Canvas(mutableBitmap)
             val paint = Paint().apply {
                 color = Color.BLACK

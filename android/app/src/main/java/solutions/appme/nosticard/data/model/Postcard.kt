@@ -14,6 +14,7 @@ data class Postcard(
     val frameType: FrameType,
     val textPosition: TextPosition,
     val textAlignment: TextAlignment,
+    val filterSettings: FilterSettings,
     val isDraft: Boolean,
     val createdAt: Date,
     val updatedAt: Date,
