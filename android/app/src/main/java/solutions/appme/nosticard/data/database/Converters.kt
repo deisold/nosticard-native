@@ -1,5 +1,6 @@
 package solutions.appme.nosticard.data.database
 
+import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -10,6 +11,7 @@ import solutions.appme.nosticard.data.model.TextAlignment
 import solutions.appme.nosticard.data.model.TextPosition
 import java.util.Date
 
+@ProvidedTypeConverter
 class Converters(
     private val gson: Gson
 ) {

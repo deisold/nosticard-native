@@ -13,6 +13,7 @@ import solutions.appme.nosticard.data.model.Postcard
     version = 1,
     exportSchema = false
 )
+@TypeConverters(Converters::class)
 abstract class NostiCardDatabase : RoomDatabase() {
     
     abstract fun postcardDao(): PostcardDao
