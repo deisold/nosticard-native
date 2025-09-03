@@ -164,6 +164,18 @@ private fun FilterSettingsControls(
     onSettingsChanged: (FilterSettings) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Local state for sliders to track values during dragging
+    var localGrainLevel by remember { mutableFloatStateOf(settings.grainLevel) }
+    var localVignetteLevel by remember { mutableFloatStateOf(settings.vignetteLevel) }
+    var localDustLevel by remember { mutableFloatStateOf(settings.dustLevel) }
+    
+    // Update local state when settings change externally
+    LaunchedEffect(settings) {
+        localGrainLevel = settings.grainLevel
+        localVignetteLevel = settings.vignetteLevel
+        localDustLevel = settings.dustLevel
+    }
+    
     Column(modifier = modifier) {
         Text(
             text = "Vintage Effects",
@@ -180,13 +192,17 @@ private fun FilterSettingsControls(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Grain")
-                Text("${(settings.grainLevel * 100).toInt()}%")
+                Text("${(localGrainLevel * 100).toInt()}%")
             }
             
             Slider(
-                value = settings.grainLevel,
+                value = localGrainLevel,
                 onValueChange = { value ->
-                    onSettingsChanged(settings.copy(grainLevel = value))
+                    localGrainLevel = value // Update local state while dragging
+                },
+                onValueChangeFinished = {
+                    // Apply effect only when user releases the slider
+                    onSettingsChanged(settings.copy(grainLevel = localGrainLevel))
                 },
                 valueRange = 0f..1f
             )
@@ -202,13 +218,17 @@ private fun FilterSettingsControls(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Vignette")
-                Text("${(settings.vignetteLevel * 100).toInt()}%")
+                Text("${(localVignetteLevel * 100).toInt()}%")
             }
             
             Slider(
-                value = settings.vignetteLevel,
+                value = localVignetteLevel,
                 onValueChange = { value ->
-                    onSettingsChanged(settings.copy(vignetteLevel = value))
+                    localVignetteLevel = value // Update local state while dragging
+                },
+                onValueChangeFinished = {
+                    // Apply effect only when user releases the slider
+                    onSettingsChanged(settings.copy(vignetteLevel = localVignetteLevel))
                 },
                 valueRange = 0f..1f
             )
@@ -224,13 +244,17 @@ private fun FilterSettingsControls(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Dust")
-                Text("${(settings.dustLevel * 100).toInt()}%")
+                Text("${(localDustLevel * 100).toInt()}%")
             }
             
             Slider(
-                value = settings.dustLevel,
+                value = localDustLevel,
                 onValueChange = { value ->
-                    onSettingsChanged(settings.copy(dustLevel = value))
+                    localDustLevel = value // Update local state while dragging
+                },
+                onValueChangeFinished = {
+                    // Apply effect only when user releases the slider
+                    onSettingsChanged(settings.copy(dustLevel = localDustLevel))
                 },
                 valueRange = 0f..1f
             )
