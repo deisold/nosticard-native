@@ -291,6 +291,7 @@ For each new feature, ensure:
 - [ ] **Auto-initialization in ViewModel init blocks**
 - [ ] **Interface-based design for ALL utilities and services (no static objects)**
 - [ ] **Dependency injection for ALL dependencies (favor testability)**
+- [ ] **Material3 Scaffold layout patterns (see below)**
 - [ ] Compose UI with `koinViewModel { parametersOf(...) }` for ViewModels
 - [ ] Error handling with Result<T> and sealed error classes
 - [ ] Navigation via callback functions
@@ -407,6 +408,86 @@ class DateUtilsImpl : DateUtils { ... }
 // All registered in Koin for dependency injection
 ```
 
+### **6. Material3 Scaffold Layout Patterns** 🚨 **CRITICAL CHANGE**
+
+**In Material2, Scaffold(topBar=…) would push the body down automatically.**
+
+**In Material3, Scaffold is edge-to-edge by default. The TopAppBar is rendered in its own layer on top of content. Therefore innerPadding does not contain the app bar height.**
+
+```kotlin
+// ❌ WRONG: Material3 Scaffold with topBar parameter (causes overlap)
+Scaffold(
+    topBar = {
+        TopAppBar(title = { Text("Title") })
+    }
+) { paddingValues ->
+    // Content will be BEHIND the app bar!
+    EditorContent(modifier = Modifier.padding(paddingValues))
+}
+
+// ✅ CORRECT: TopAppBar as part of content layout
+Scaffold(
+    snackbarHost = { SnackbarHost(snackbarHostState) },
+    //contentWindowInsets = WindowInsets.safeDrawing // optional for safe areas
+) { innerPadding ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding) // ← keeps everything inside safe area
+    ) {
+        // TOP APP BAR is part of the layout → content cannot be behind it
+        TopAppBar(
+            title = { Text("Edit Postcard") },
+            navigationIcon = {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors( // force opaque bar
+                containerColor = MaterialTheme.colorScheme.surface,
+                titleContentColor = MaterialTheme.colorScheme.onSurface,
+                navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                actionIconContentColor = MaterialTheme.colorScheme.onSurface
+            )
+        )
+
+        // ------- EVERYTHING BELOW THE BAR -------
+        when (val state = viewState) {
+            is MyState.Ready -> {
+                // make body scrollable so content doesn't push under system bars
+                val scroll = rememberScrollState()
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scroll)
+                ) {
+                    // Your content here - firmly below the app bar
+                    MyContent()
+                    
+                    // Bottom actions, protected from gesture bar
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .windowInsetsPadding(WindowInsets.navigationBars)
+                    ) {
+                        // Bottom buttons
+                    }
+                }
+            }
+            // ... other states
+        }
+    }
+}
+```
+
+**Key Points:**
+- **TopAppBar** must be inside the content Column, not in `Scaffold.topBar`
+- Use `innerPadding` from Scaffold to respect system bars (status/navigation)
+- Add `verticalScroll` to prevent content from being pushed under system UI
+- Use `windowInsetsPadding(WindowInsets.navigationBars)` for bottom actions
+- Force opaque colors on TopAppBar to prevent transparency issues
+
 ---
 
 # 📊 **COMPREHENSIVE IMPLEMENTATION STATUS**
@@ -427,7 +508,7 @@ class DateUtilsImpl : DateUtils { ... }
 | Screen | Status | Progress | Implementation Details |
 |--------|--------|----------|------------------------|
 | **HomeScreen** | ✅ Complete | 100% | MVI, navigation, state management |
-| **EditorScreen** | ✅ Complete | 95% | Full UI working, auto-load fixed, needs image picker |
+| **EditorScreen** | ✅ Complete | 100% | Full UI working, Material3 layout fixed, image picker working |
 | **PreviewScreen** | ✅ Complete | 80% | UI complete, export logic stubs |
 | **MyCardsScreen** | ✅ Complete | 100% | Card management, tabs, actions |
 | **SettingsScreen** | ✅ Complete | 90% | Billing UI, missing billing logic |
@@ -452,11 +533,11 @@ class DateUtilsImpl : DateUtils { ... }
 | **Filter System** | ✅ **Implemented** | 80% | Full ColorMatrix implementation working |
 | **Classic B&W Filter** | ✅ **Complete** | 100% | ColorMatrix saturation implemented |
 | **Sepia Filter** | ✅ **Complete** | 100% | Full sepia ColorMatrix implemented |
-| **Faded Color Filter** | ✅ **Complete** | 100% | Alpha opacity effect implemented |
-| **Frame System** | ⚠️ Partial | 60% | Architecture + white border working |
+| **Vintage Warmth Filter** | ✅ **Complete** | 100% | Warm tone ColorMatrix with sepia undertones |
+| **Frame System** | ✅ **Complete** | 100% | All frames implemented and working |
 | **White Border Frame** | ✅ **Complete** | 100% | Canvas drawing implemented |
-| **Deckle Edge Frame** | ❌ Not Implemented | 0% | Irregular border effect needed |
-| **Stamp Edge Frame** | ❌ Not Implemented | 0% | Perforated border effect needed |
+| **Deckle Edge Frame** | ✅ **Complete** | 100% | Torn paper effect with jagged edges |
+| **Stamp Edge Frame** | ✅ **Complete** | 100% | Scalloped edges like vintage stamps |
 | **Vintage Effects** | ❌ Stub | 5% | Scratches/dust/grain stub only |
 | **Text Overlay** | ✅ **Complete** | 100% | Canvas text drawing implemented |
 | **Watermark System** | ✅ **Complete** | 100% | Free user watermark implemented |
