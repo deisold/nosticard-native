@@ -439,7 +439,8 @@ class EditorViewModel(
                 savePostcardUseCase(draftPostcard)
                     .onSuccess {
                         _state.value = currentState.copy(isSaving = false)
-                        _effect.emit(EditorEffect.ShowSnackbar(SnackbarMessages.success("Draft saved")))
+                        // Navigate back to home after successful save
+                        _effect.emit(EditorEffect.NavigateBack)
                     }
                     .onFailure { error ->
                         _state.value = currentState.copy(isSaving = false)

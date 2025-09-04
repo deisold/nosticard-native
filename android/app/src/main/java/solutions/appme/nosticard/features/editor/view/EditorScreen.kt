@@ -24,6 +24,8 @@ import solutions.appme.nosticard.features.editor.view.components.*
 import solutions.appme.nosticard.features.editor.viewmodel.*
 import solutions.appme.nosticard.ui.components.showSnackbar
 import solutions.appme.nosticard.ui.components.ImagePickerBottomSheet
+import solutions.appme.nosticard.ui.components.LoadingButton
+import solutions.appme.nosticard.ui.components.LoadingButtonVariant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,17 +127,13 @@ fun EditorScreen(
                                 .windowInsetsPadding(WindowInsets.navigationBars),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            OutlinedButton(
+                            LoadingButton(
+                                text = "Save Draft",
+                                isLoading = s.isSaving,
                                 onClick = { viewModel.handleIntent(EditorIntent.SaveDraft) },
                                 modifier = Modifier.weight(1f),
-                                enabled = !s.isSaving
-                            ) {
-                                if (s.isSaving) {
-                                    CircularProgressIndicator(Modifier.size(16.dp))
-                                } else {
-                                    Text("Save Draft")
-                                }
-                            }
+                                variant = LoadingButtonVariant.Outlined
+                            )
                             Button(
                                 onClick = { viewModel.handleIntent(EditorIntent.SaveCompleted) },
                                 modifier = Modifier.weight(1f),
