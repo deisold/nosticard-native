@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -39,6 +40,8 @@ fun EditorScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var showImagePicker by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
+    var showRenameDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(initialImageUri) {
         initialImageUri?.let { viewModel.handleIntent(EditorIntent.LoadImage(it)) }
@@ -66,7 +69,12 @@ fun EditorScreen(
         ) {
             // TOP APP BAR is part of the layout → content cannot be behind it
             TopAppBar(
-                title = { Text("Edit Postcard") },
+                title = { 
+                    Text(when (val currentState = state) {
+                        is EditorState.Ready -> currentState.postcard.title
+                        else -> "Edit Postcard"
+                    })
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -75,6 +83,25 @@ fun EditorScreen(
                 actions = {
                     IconButton(onClick = { viewModel.handleIntent(EditorIntent.SaveDraft) }) {
                         Icon(Icons.Default.Star, contentDescription = "Save Draft")
+                    }
+                    
+                    Box {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                        }
+                        
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Rename") },
+                                onClick = {
+                                    showMenu = false
+                                    showRenameDialog = true
+                                }
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors( // force opaque bar
@@ -173,5 +200,66 @@ fun EditorScreen(
                 onDismiss = { showImagePicker = false }
             )
         }
+        
+        // Rename Dialog
+        if (showRenameDialog) {
+            when (val currentState = state) {
+                is EditorState.Ready -> {
+                    RenameDialog(
+                        currentName = currentState.postcard.title,
+                        onRename = { newName ->
+                            viewModel.handleIntent(EditorIntent.RenamePostcard(newName))
+                            showRenameDialog = false
+                        },
+                        onDismiss = { showRenameDialog = false }
+                    )
+                }
+                else -> {
+                    showRenameDialog = false
+                }
+            }
+        }
     }
+}
+
+@Composable
+private fun RenameDialog(
+    currentName: String,
+    onRename: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var newName by remember { mutableStateOf(currentName) }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text("Rename Postcard")
+        },
+        text = {
+            OutlinedTextField(
+                value = newName,
+                onValueChange = { newName = it },
+                label = { Text("Postcard Name") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (newName.isNotBlank()) {
+                        onRename(newName.trim())
+                    }
+                },
+                enabled = newName.isNotBlank() && newName.trim() != currentName
+            ) {
+                Text("Rename")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

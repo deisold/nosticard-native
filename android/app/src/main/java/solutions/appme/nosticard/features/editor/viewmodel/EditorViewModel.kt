@@ -41,6 +41,7 @@ class EditorViewModel(
             is EditorIntent.UpdateTextPosition -> updateTextPosition(intent.position)
             is EditorIntent.UpdateTextAlignment -> updateTextAlignment(intent.alignment)
             is EditorIntent.UpdateFilterSettings -> updateFilterSettings(intent.settings)
+            is EditorIntent.RenamePostcard -> renamePostcard(intent.newName)
             is EditorIntent.GeneratePreview -> generatePreview()
             is EditorIntent.SaveDraft -> saveDraft()
             is EditorIntent.SaveCompleted -> saveCompleted()
@@ -488,6 +489,33 @@ class EditorViewModel(
     private fun selectImage() {
         viewModelScope.launch {
             _effect.emit(EditorEffect.LaunchPhotoPicker)
+        }
+    }
+    
+    private fun renamePostcard(newName: String) {
+        val currentState = _state.value
+        if (currentState is EditorState.Ready) {
+            val updatedPostcard = currentState.postcard.copy(
+                title = newName,
+                updatedAt = Date()
+            )
+            
+            val updatedState = currentState.copy(postcard = updatedPostcard)
+            _state.value = updatedState
+            
+            viewModelScope.launch {
+                savePostcardUseCase(updatedPostcard)
+                    .onSuccess {
+                        _effect.emit(EditorEffect.ShowSnackbar(
+                            SnackbarMessages.success("Postcard renamed to \"$newName\"")
+                        ))
+                    }
+                    .onFailure { error ->
+                        _effect.emit(EditorEffect.ShowSnackbar(
+                            SnackbarMessages.error("Failed to rename: ${error.message}")
+                        ))
+                    }
+            }
         }
     }
 }

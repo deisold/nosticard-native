@@ -36,6 +36,7 @@ sealed class EditorIntent {
     data class UpdateTextPosition(val position: TextPosition) : EditorIntent()
     data class UpdateTextAlignment(val alignment: TextAlignment) : EditorIntent()
     data class UpdateFilterSettings(val settings: FilterSettings) : EditorIntent()
+    data class RenamePostcard(val newName: String) : EditorIntent()
     object GeneratePreview : EditorIntent()
     object SaveDraft : EditorIntent()
     object SaveCompleted : EditorIntent()

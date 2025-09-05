@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -82,7 +83,7 @@ private fun FilterSelection(
     Column(modifier = modifier) {
         Text(
             text = "Filters",
-            style = MaterialTheme.typography.titleSmall
+            style = MaterialTheme.typography.bodyMedium // Same size as vintage effects
         )
         
         Spacer(modifier = Modifier.height(8.dp))
@@ -90,7 +91,7 @@ private fun FilterSelection(
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(FilterType.values()) { filter ->
+            items(FilterType.entries.toTypedArray()) { filter ->
                 FilterChip(
                     selected = selectedFilter == filter,
                     onClick = { onFilterSelected(filter) },
@@ -118,7 +119,7 @@ private fun FrameSelection(
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(FrameType.values()) { frame ->
+            items(FrameType.entries.toTypedArray()) { frame ->
                 FilterChip(
                     selected = selectedFrame == frame,
                     onClick = { onFrameSelected(frame) },
@@ -146,7 +147,7 @@ private fun TextAlignmentControls(
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            TextAlignment.values().forEach { alignment ->
+            TextAlignment.entries.forEach { alignment ->
                 FilterChip(
                     selected = selectedAlignment == alignment,
                     onClick = { onAlignmentChanged(alignment) },
@@ -179,7 +180,7 @@ private fun FilterSettingsControls(
     Column(modifier = modifier) {
         Text(
             text = "Vintage Effects",
-            style = MaterialTheme.typography.titleSmall
+            style = MaterialTheme.typography.bodyMedium // Smaller text, same as filters
         )
         
         Spacer(modifier = Modifier.height(8.dp))
@@ -204,7 +205,31 @@ private fun FilterSettingsControls(
                     // Apply effect only when user releases the slider
                     onSettingsChanged(settings.copy(grainLevel = localGrainLevel))
                 },
-                valueRange = 0f..1f
+                valueRange = 0f..1f,
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                ),
+                track = { sliderState ->
+                    SliderDefaults.Track(
+                        sliderState = sliderState,
+                        modifier = Modifier.height(3.dp), // Actually 3px track thickness
+                        colors = SliderDefaults.colors(
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                            inactiveTrackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        )
+                    )
+                },
+                thumb = {
+                    SliderDefaults.Thumb(
+                        interactionSource = remember { MutableInteractionSource() },
+                        modifier = Modifier.size(20.dp), // Round thumb size
+                        colors = SliderDefaults.colors(
+                            thumbColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
             )
         }
         
@@ -230,7 +255,31 @@ private fun FilterSettingsControls(
                     // Apply effect only when user releases the slider
                     onSettingsChanged(settings.copy(vignetteLevel = localVignetteLevel))
                 },
-                valueRange = 0f..1f
+                valueRange = 0f..1f,
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                ),
+                track = { sliderState ->
+                    SliderDefaults.Track(
+                        sliderState = sliderState,
+                        modifier = Modifier.height(3.dp), // Actually 3px track thickness
+                        colors = SliderDefaults.colors(
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                            inactiveTrackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        )
+                    )
+                },
+                thumb = {
+                    SliderDefaults.Thumb(
+                        interactionSource = remember { MutableInteractionSource() },
+                        modifier = Modifier.size(20.dp), // Round thumb size
+                        colors = SliderDefaults.colors(
+                            thumbColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
             )
         }
         
@@ -256,7 +305,31 @@ private fun FilterSettingsControls(
                     // Apply effect only when user releases the slider
                     onSettingsChanged(settings.copy(dustLevel = localDustLevel))
                 },
-                valueRange = 0f..1f
+                valueRange = 0f..1f,
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                ),
+                track = { sliderState ->
+                    SliderDefaults.Track(
+                        sliderState = sliderState,
+                        modifier = Modifier.height(3.dp), // Actually 3px track thickness
+                        colors = SliderDefaults.colors(
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                            inactiveTrackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        )
+                    )
+                },
+                thumb = {
+                    SliderDefaults.Thumb(
+                        interactionSource = remember { MutableInteractionSource() },
+                        modifier = Modifier.size(20.dp), // Round thumb size
+                        colors = SliderDefaults.colors(
+                            thumbColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
             )
         }
     }
