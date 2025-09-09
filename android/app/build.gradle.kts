@@ -84,11 +84,14 @@ dependencies {
     implementation(libs.retrofit.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.gson)
     
     // Image Loading
     implementation(libs.coil.compose)
     
+    // GPUImage for advanced image filtering
+    implementation(libs.gpuimage)
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)

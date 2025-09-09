@@ -40,7 +40,7 @@ val domainModule = module {
     
     factory<ApplyFilterUseCase> {
         ApplyFilterUseCase(
-            imageRepository = get()
+            imageFilterProcessor = get()
         )
     }
     

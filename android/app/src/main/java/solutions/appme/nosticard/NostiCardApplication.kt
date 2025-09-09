@@ -7,6 +7,7 @@ import org.koin.core.context.startKoin
 import solutions.appme.nosticard.di.appModule
 import solutions.appme.nosticard.di.dataModule
 import solutions.appme.nosticard.di.domainModule
+import solutions.appme.nosticard.di.imageModule
 import solutions.appme.nosticard.di.viewModelModule
 
 class NostiCardApplication : Application() {
@@ -21,6 +22,7 @@ class NostiCardApplication : Application() {
                 appModule,
                 dataModule,
                 domainModule,
+                imageModule,
                 viewModelModule
             )
         }

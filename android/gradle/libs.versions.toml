@@ -1,5 +1,7 @@
 [versions]
 agp = "8.13.0"
+gpuimage = "2.1.0"
+gson = "2.13.1"
 kotlin = "2.0.21"
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -52,6 +54,8 @@ androidx-activity-result = { group = "androidx.activity", name = "activity-compo
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 
 # Koin Dependency Injection
+gpuimage = { module = "jp.co.cyberagent.android:gpuimage", version.ref = "gpuimage" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
